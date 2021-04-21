@@ -1,8 +1,16 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using Shinsekai_API.Config;
+using Shinsekai_API.Models;
 
 namespace Shinsekai_API
 {
@@ -22,31 +30,26 @@ namespace Shinsekai_API
                 c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
 
-            // services.AddAuthentication(r =>
-            // {
-            //     r.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //     r.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            // }).AddJwtBearer(x =>
-            // {
-            //     x.RequireHttpsMetadata = false;
-            //     x.SaveToken = true;
-            //     x.TokenValidationParameters = new TokenValidationParameters
-            //     {
-            //         ValidateIssuerSigningKey = true,
-            //         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppConfig.JwtSecretKey)),
-            //         ValidateIssuer = true,
-            //         ValidateAudience = true,
-            //         ValidateLifetime = true,
-            //         ValidIssuer = "https://localhost:5001",
-            //         ValidAudience = "https://localhost:5001"
-            //     };
-            // });
-
-            // services.AddControllersWithViews().AddNewtonsoftJson(options =>
-            //         options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore)
-            //     .AddNewtonsoftJson(options =>
-            //         options.SerializerSettings.ContractResolver = new DefaultContractResolver());
-            // services.AddDbContext<TripPlannerContext>(options => options.UseSqlServer(AppConfig.SqlConnectionString));
+            services.AddAuthentication(r =>
+            {
+                r.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                r.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(APIConfiguration.JwtSecretKey)),
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidIssuer = "https://localhost:5001",
+                    ValidAudience = "https://localhost:5001"
+                };
+            });
+            services.AddDbContext<ShinsekaiApiContext>(options => options.UseSqlServer(APIConfiguration.ConnectionString));
             services.AddControllers();
         }
 
