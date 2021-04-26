@@ -11,9 +11,9 @@ namespace Shinsekai_API.Migrations
                 name: "AuthParams",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Salt = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Salt = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -24,8 +24,8 @@ namespace Shinsekai_API.Migrations
                 name: "Brands",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -36,9 +36,9 @@ namespace Shinsekai_API.Migrations
                 name: "Carousels",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RedirectPath = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    ImagePath = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    RedirectPath = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -49,8 +49,8 @@ namespace Shinsekai_API.Migrations
                 name: "Lines",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -61,8 +61,8 @@ namespace Shinsekai_API.Migrations
                 name: "Locations",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -73,8 +73,8 @@ namespace Shinsekai_API.Migrations
                 name: "Materials",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -85,9 +85,9 @@ namespace Shinsekai_API.Migrations
                 name: "Promotions",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RedirectPath = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    ImagePath = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    RedirectPath = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -98,9 +98,9 @@ namespace Shinsekai_API.Migrations
                 name: "Questions",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Question = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Answer = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Question = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Answer = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -111,13 +111,14 @@ namespace Shinsekai_API.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Admin = table.Column<bool>(type: "bit", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AuthParamsId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Phone = table.Column<string>(type: "nvarchar(12)", maxLength: 12, nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    City = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    AuthParamsId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -127,122 +128,22 @@ namespace Shinsekai_API.Migrations
                         column: x => x.AuthParamsId,
                         principalTable: "AuthParams",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Deliveries",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Parcel = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EstimatedDays = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LocationId = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Deliveries", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Deliveries_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Points",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Amount = table.Column<float>(type: "real", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Points", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Points_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Purchases",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    DateTime = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Purchases", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Purchases_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ShoppingCartArticles",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    ArticleId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Article = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ShoppingCartArticles", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ShoppingCartArticles_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Requests",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    PurchaseId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Details = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Requests", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Requests_Purchases_PurchaseId",
-                        column: x => x.PurchaseId,
-                        principalTable: "Purchases",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Articles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Height = table.Column<float>(type: "real", nullable: false),
-                    Price = table.Column<float>(type: "real", nullable: false),
-                    DiscountPrice = table.Column<float>(type: "real", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Height = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DiscountPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Stock = table.Column<int>(type: "int", nullable: false),
                     Replica = table.Column<bool>(type: "bit", nullable: false),
-                    Details = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    BrandId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    ShoppingCartArticleId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Details = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    BrandId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -253,21 +154,74 @@ namespace Shinsekai_API.Migrations
                         principalTable: "Brands",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Deliveries",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Parcel = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    EstimatedDays = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LocationId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Deliveries", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Articles_ShoppingCartArticles_ShoppingCartArticleId",
-                        column: x => x.ShoppingCartArticleId,
-                        principalTable: "ShoppingCartArticles",
+                        name: "FK_Deliveries_Locations_LocationId",
+                        column: x => x.LocationId,
+                        principalTable: "Locations",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Points",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    ExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Points", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Points_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Purchases",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Purchases", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Purchases_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Animes",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ArticleItemId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ArticleItemId = table.Column<string>(type: "nvarchar(36)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -284,9 +238,9 @@ namespace Shinsekai_API.Migrations
                 name: "Favorites",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    ArticleId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -296,22 +250,22 @@ namespace Shinsekai_API.Migrations
                         column: x => x.ArticleId,
                         principalTable: "Articles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Favorites_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Images",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Path = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ArticleId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Path = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -321,16 +275,16 @@ namespace Shinsekai_API.Migrations
                         column: x => x.ArticleId,
                         principalTable: "Articles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "LinesArticles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ArticleId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    LineId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    LineId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -340,22 +294,22 @@ namespace Shinsekai_API.Migrations
                         column: x => x.ArticleId,
                         principalTable: "Articles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_LinesArticles_Lines_LineId",
                         column: x => x.LineId,
                         principalTable: "Lines",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "MaterialsArticles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ArticleId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    MaterialId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    MaterialId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -365,21 +319,21 @@ namespace Shinsekai_API.Migrations
                         column: x => x.ArticleId,
                         principalTable: "Articles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_MaterialsArticles_Materials_MaterialId",
                         column: x => x.MaterialId,
                         principalTable: "Materials",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Originals",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ArticleId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -389,41 +343,15 @@ namespace Shinsekai_API.Migrations
                         column: x => x.ArticleId,
                         principalTable: "Articles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PurchasesArticles",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ArticleId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    PruchaseId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PurchaseId = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PurchasesArticles", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PurchasesArticles_Articles_ArticleId",
-                        column: x => x.ArticleId,
-                        principalTable: "Articles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_PurchasesArticles_Purchases_PurchaseId",
-                        column: x => x.PurchaseId,
-                        principalTable: "Purchases",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Replicas",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ArticleId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -433,16 +361,16 @@ namespace Shinsekai_API.Migrations
                         column: x => x.ArticleId,
                         principalTable: "Articles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Sales",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
                     SoldDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ArticleId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -452,16 +380,86 @@ namespace Shinsekai_API.Migrations
                         column: x => x.ArticleId,
                         principalTable: "Articles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ShoppingCartArticles",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShoppingCartArticles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ShoppingCartArticles_Articles_ArticleId",
+                        column: x => x.ArticleId,
+                        principalTable: "Articles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ShoppingCartArticles_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PurchasesArticles",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    PurchaseId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PurchasesArticles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PurchasesArticles_Articles_ArticleId",
+                        column: x => x.ArticleId,
+                        principalTable: "Articles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PurchasesArticles_Purchases_PurchaseId",
+                        column: x => x.PurchaseId,
+                        principalTable: "Purchases",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Requests",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    PurchaseId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Details = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Requests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Requests_Purchases_PurchaseId",
+                        column: x => x.PurchaseId,
+                        principalTable: "Purchases",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "AnimesArticles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ArticleId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    AnimeId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    AnimeId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -471,13 +469,13 @@ namespace Shinsekai_API.Migrations
                         column: x => x.AnimeId,
                         principalTable: "Animes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AnimesArticles_Articles_ArticleId",
                         column: x => x.ArticleId,
                         principalTable: "Articles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -503,16 +501,10 @@ namespace Shinsekai_API.Migrations
                 filter: "[BrandId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Articles_ShoppingCartArticleId",
-                table: "Articles",
-                column: "ShoppingCartArticleId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Deliveries_LocationId",
                 table: "Deliveries",
                 column: "LocationId",
-                unique: true,
-                filter: "[LocationId] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Favorites_ArticleId",
@@ -590,6 +582,11 @@ namespace Shinsekai_API.Migrations
                 column: "ArticleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ShoppingCartArticles_ArticleId",
+                table: "ShoppingCartArticles",
+                column: "ArticleId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ShoppingCartArticles_UserId",
                 table: "ShoppingCartArticles",
                 column: "UserId");
@@ -598,8 +595,7 @@ namespace Shinsekai_API.Migrations
                 name: "IX_Users_AuthParamsId",
                 table: "Users",
                 column: "AuthParamsId",
-                unique: true,
-                filter: "[AuthParamsId] IS NOT NULL");
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -650,6 +646,9 @@ namespace Shinsekai_API.Migrations
                 name: "Sales");
 
             migrationBuilder.DropTable(
+                name: "ShoppingCartArticles");
+
+            migrationBuilder.DropTable(
                 name: "Animes");
 
             migrationBuilder.DropTable(
@@ -668,13 +667,10 @@ namespace Shinsekai_API.Migrations
                 name: "Articles");
 
             migrationBuilder.DropTable(
-                name: "Brands");
-
-            migrationBuilder.DropTable(
-                name: "ShoppingCartArticles");
-
-            migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Brands");
 
             migrationBuilder.DropTable(
                 name: "AuthParams");

@@ -1,12 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shinsekai_API.Authentication;
 using Shinsekai_API.Models;
+using Shinsekai_API.Responses;
 
 namespace Shinsekai_API.Controllers
 {
     [ApiController]
-    [Route("user")]
+    [Route("api/user")]
     public class UserController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
@@ -16,21 +21,130 @@ namespace Shinsekai_API.Controllers
             _context = context;
         }
 
+        [Authorize]
         [HttpGet]
-        public IActionResult GetUserByEmail([FromQuery] string email)
+        public IActionResult GetUserInfo()
         {
-            var foundUser = _context.Users.FirstOrDefault(u => u.Email == email);
-            if (foundUser == null)
+            var id = AuthService.IdentifyUser(User.Identity);
+            var dbUser = _context.Users.FirstOrDefault(u => u.Id == id);
+            if (dbUser == null)
             {
-                return NotFound(new
+                return BadRequest(new
                 {
-                    Error = "User not found on records"
+                    Error = "Something went wrong"
                 });
             }
             return Ok(new
             {
-                Result = foundUser 
+                Result = dbUser
             });
         }
+
+        [Authorize]
+        [HttpGet("cart")]
+        public IActionResult GetCart()
+        {
+            var id = AuthService.IdentifyUser(User.Identity);
+            var dbCart = _context.ShoppingCartArticles.Join(_context.Users,
+                    s => s.UserId,
+                    u => u.Id,
+                    (s, u) => new
+                    {
+                        ShoppingCart = s,
+                        User = u
+                    }).Where(su => su.User.Id == id)
+                .Select(su => su.ShoppingCart);
+
+            return Ok(new
+            {
+                Result = dbCart
+            });
+        }
+
+        [Authorize]
+        [HttpGet("favorites")]
+        public IActionResult GetFavorites()
+        {
+            var id = AuthService.IdentifyUser(User.Identity);
+            var dbFavorites = _context.Favorites.Join(_context.Users,
+                    f => f.UserId,
+                    u => u.Id,
+                    (f, u) => new
+                    {
+                        Favorites = f,
+                        User = u
+                    }).Where(fu => fu.User.Id == id)
+                .Select(fu => fu.Favorites);
+
+            return Ok(new
+            {
+                Result = dbFavorites
+            });
+        }
+
+        [Authorize]
+        [HttpGet("points")]
+        public IActionResult GetPoints()
+        {
+            var id = AuthService.IdentifyUser(User.Identity);
+            var dbPoints = _context.Points.Join(_context.Users,
+                    p => p.UserId,
+                    u => u.Id,
+                    (p, u) => new
+                    {
+                        Points = p,
+                        User = u
+                    }).Where(pu => pu.User.Id == id)
+                .Select(pu => pu.Points);
+            var expiredPoints = dbPoints.Where(p => p.ExpirationDate < DateTime.Now).ToList();
+            var validPoints = dbPoints.Where(p => p.ExpirationDate >= DateTime.Now).ToList();
+
+            return Ok(new
+            {
+                Result = new PointResponse()
+                {
+                    ExpiredPoints = expiredPoints,
+                    ValidPoints = validPoints,
+                    TotalExpired = expiredPoints.Sum(p => (int)p.Amount),
+                    TotalValid = validPoints.Sum(p => (int)p.Amount)
+                }
+            });
+        }
+
+        [Authorize]
+        [HttpGet("purchases")]
+        public IActionResult GetPurchases()
+        {
+            var id = AuthService.IdentifyUser(User.Identity);
+            var dbPurchases = _context.PurchasesArticles.Join(_context.Purchases,
+                    pa => pa.PurchaseId,
+                    p => p.Id,
+                    (pa, p) => new
+                    {
+                        PurchaseArticle = pa,
+                        Purchase = p
+                    }).Join(_context.Articles,
+                    pa => pa.PurchaseArticle.ArticleId,
+                    a => a.Id,
+                    (pa, a) => new
+                    {
+                        PurchaseArticle = pa.PurchaseArticle,
+                        Article = a
+                    }).Where(paa => paa.PurchaseArticle.Purchase.UserId == id)
+                .Select(paa => new
+                {
+                    PurchaseId = paa.PurchaseArticle.PurchaseId,
+                    Date = paa.PurchaseArticle.Purchase.Date,
+                    Article = paa.PurchaseArticle.Article
+                }).OrderBy(p => p.PurchaseId).ToList()
+                .GroupBy(p => p.PurchaseId);
+
+            return Ok(new
+            {
+                Response = dbPurchases,
+                Count = dbPurchases.Count()
+            });
+        }
+
     }
 }

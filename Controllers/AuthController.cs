@@ -156,7 +156,7 @@ namespace Shinsekai_API.Controllers
             {
                 Id = id,
                 Email = email,
-                AuthParams = authParams 
+                AuthParams = authParams,
             };
             _context.Users.Add(dbUser);
             _context.SaveChanges();

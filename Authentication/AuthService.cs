@@ -34,5 +34,17 @@ namespace Shinsekai_API.Authentication
            return id;
         }
 
+        public static bool AuthorizeAdmin(IIdentity identity, ShinsekaiApiContext context)
+        {
+            var id = IdentifyUser(identity);
+            var dbAdminUser = context.Users.FirstOrDefault(u => u.Id == id);
+            
+            if (dbAdminUser is not {Admin: true})
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

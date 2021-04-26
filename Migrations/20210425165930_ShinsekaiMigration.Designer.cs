@@ -10,7 +10,7 @@ using Shinsekai_API.Models;
 namespace Shinsekai_API.Migrations
 {
     [DbContext(typeof(ShinsekaiApiContext))]
-    [Migration("20210416040057_ShinsekaiMigration")]
+    [Migration("20210425165930_ShinsekaiMigration")]
     partial class ShinsekaiMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,13 +24,18 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.AnimeArticleItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("AnimeId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ArticleId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.HasKey("Id");
 
@@ -44,13 +49,16 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.AnimeItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ArticleItemId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -62,31 +70,33 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.ArticleItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("BrandId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("Details")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
-                    b.Property<float>("DiscountPrice")
-                        .HasColumnType("real");
+                    b.Property<decimal>("DiscountPrice")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<float>("Height")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Height")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<float>("Price")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("Replica")
                         .HasColumnType("bit");
-
-                    b.Property<string>("ShoppingCartArticleId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Stock")
                         .HasColumnType("int");
@@ -97,21 +107,24 @@ namespace Shinsekai_API.Migrations
                         .IsUnique()
                         .HasFilter("[BrandId] IS NOT NULL");
 
-                    b.HasIndex("ShoppingCartArticleId");
-
                     b.ToTable("Articles");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.AuthParamItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("Password")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("Salt")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -121,10 +134,13 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.BrandItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -134,13 +150,17 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.CarouselItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ImagePath")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("RedirectPath")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -150,22 +170,26 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.DeliveryItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<DateTime>("EstimatedDays")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("LocationId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("Parcel")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("LocationId")
-                        .IsUnique()
-                        .HasFilter("[LocationId] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("Deliveries");
                 });
@@ -173,13 +197,18 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.FavoriteItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ArticleId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.HasKey("Id");
 
@@ -193,13 +222,18 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.ImageItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ArticleId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("Path")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -211,13 +245,18 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.LineArticleItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ArticleId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("LineId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.HasKey("Id");
 
@@ -231,10 +270,13 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.LineItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -244,10 +286,13 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.LocationItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -257,13 +302,18 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.MaterialArticleItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ArticleId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("MaterialId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.HasKey("Id");
 
@@ -277,10 +327,13 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.MaterialItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -290,10 +343,13 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.OriginalItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ArticleId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.HasKey("Id");
 
@@ -305,16 +361,19 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.PointItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
-                    b.Property<float>("Amount")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("ExpirationDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.HasKey("Id");
 
@@ -326,13 +385,17 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.PromotionItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ImagePath")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("RedirectPath")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -342,16 +405,18 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.PurchaseArticleItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ArticleId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("PruchaseId")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("PurchaseId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.HasKey("Id");
 
@@ -365,13 +430,16 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.PurchaseItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
-                    b.Property<DateTime>("DateTime")
+                    b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.HasKey("Id");
 
@@ -383,13 +451,18 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.QuestionItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("Answer")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("Question")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
@@ -399,10 +472,13 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.ReplicaItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ArticleId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.HasKey("Id");
 
@@ -414,16 +490,23 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.RequestItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("Details")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("PurchaseId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.HasKey("Id");
 
@@ -435,10 +518,13 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.SaleItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ArticleId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<DateTime>("SoldDate")
                         .HasColumnType("datetime2");
@@ -453,18 +539,22 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.ShoppingCartArticleItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Article")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ArticleId")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ArticleId");
 
                     b.HasIndex("UserId");
 
@@ -474,31 +564,42 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.UserItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<bool>("Admin")
                         .HasColumnType("bit");
 
                     b.Property<string>("AuthParamsId")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AuthParamsId")
-                        .IsUnique()
-                        .HasFilter("[AuthParamsId] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -507,11 +608,15 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.AnimeItem", "Anime")
                         .WithMany("ArticlesAnimes")
-                        .HasForeignKey("AnimeId");
+                        .HasForeignKey("AnimeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
                         .WithMany()
-                        .HasForeignKey("ArticleId");
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Anime");
 
@@ -531,20 +636,16 @@ namespace Shinsekai_API.Migrations
                         .WithOne("Article")
                         .HasForeignKey("Shinsekai_API.Models.ArticleItem", "BrandId");
 
-                    b.HasOne("Shinsekai_API.Models.ShoppingCartArticleItem", "ShoppingCartArticle")
-                        .WithMany()
-                        .HasForeignKey("ShoppingCartArticleId");
-
                     b.Navigation("Brand");
-
-                    b.Navigation("ShoppingCartArticle");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.DeliveryItem", b =>
                 {
                     b.HasOne("Shinsekai_API.Models.LocationItem", "Location")
                         .WithOne("Delivery")
-                        .HasForeignKey("Shinsekai_API.Models.DeliveryItem", "LocationId");
+                        .HasForeignKey("Shinsekai_API.Models.DeliveryItem", "LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Location");
                 });
@@ -553,11 +654,15 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
                         .WithMany("Favorites")
-                        .HasForeignKey("ArticleId");
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Shinsekai_API.Models.UserItem", "User")
                         .WithMany("Favorites")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Article");
 
@@ -568,7 +673,9 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
                         .WithMany("Images")
-                        .HasForeignKey("ArticleId");
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Article");
                 });
@@ -577,11 +684,15 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
                         .WithMany()
-                        .HasForeignKey("ArticleId");
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Shinsekai_API.Models.LineItem", "Line")
                         .WithMany("LinesArticles")
-                        .HasForeignKey("LineId");
+                        .HasForeignKey("LineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Article");
 
@@ -592,11 +703,15 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
                         .WithMany("MaterialsArticles")
-                        .HasForeignKey("ArticleId");
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Shinsekai_API.Models.MaterialItem", "Material")
                         .WithMany("Materials")
-                        .HasForeignKey("MaterialId");
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Article");
 
@@ -607,7 +722,9 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
                         .WithMany("Originals")
-                        .HasForeignKey("ArticleId");
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Article");
                 });
@@ -616,7 +733,9 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.UserItem", "User")
                         .WithMany("Points")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -625,11 +744,15 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
                         .WithMany("PurchasesArticles")
-                        .HasForeignKey("ArticleId");
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Shinsekai_API.Models.PurchaseItem", "Purchase")
                         .WithMany("PurchasesArticles")
-                        .HasForeignKey("PurchaseId");
+                        .HasForeignKey("PurchaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Article");
 
@@ -640,7 +763,9 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.UserItem", "User")
                         .WithMany("Purchases")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -649,7 +774,9 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
                         .WithMany("Replicas")
-                        .HasForeignKey("ArticleId");
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Article");
                 });
@@ -658,7 +785,9 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.PurchaseItem", "Purchase")
                         .WithMany("Requests")
-                        .HasForeignKey("PurchaseId");
+                        .HasForeignKey("PurchaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Purchase");
                 });
@@ -667,16 +796,28 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
                         .WithMany("Sales")
-                        .HasForeignKey("ArticleId");
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Article");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.ShoppingCartArticleItem", b =>
                 {
+                    b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
+                        .WithMany("ShoppingCartsArticles")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Shinsekai_API.Models.UserItem", "User")
                         .WithMany("SoppingCartArticles")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
 
                     b.Navigation("User");
                 });
@@ -685,7 +826,9 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.AuthParamItem", "AuthParams")
                         .WithOne("User")
-                        .HasForeignKey("Shinsekai_API.Models.UserItem", "AuthParamsId");
+                        .HasForeignKey("Shinsekai_API.Models.UserItem", "AuthParamsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("AuthParams");
                 });
@@ -712,6 +855,8 @@ namespace Shinsekai_API.Migrations
                     b.Navigation("Replicas");
 
                     b.Navigation("Sales");
+
+                    b.Navigation("ShoppingCartsArticles");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.AuthParamItem", b =>
