@@ -7,7 +7,7 @@ using Shinsekai_API.Requests;
 namespace Shinsekai_API.Controllers
 {
     [ApiController]
-    [Route("article")]
+    [Route("api/articles")]
     public class ArticleController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
@@ -18,10 +18,11 @@ namespace Shinsekai_API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetArticles([FromBody] ArticleRequest req)
+        public IActionResult GetArticles([FromQuery] string search, bool byAnime, bool byMaterial, bool byLine)
         {
             var dbArticles = new List<ArticleItem>();
-            if (req.ByAnime)
+            
+            if (byAnime)
             {
                 dbArticles = _context.AnimesArticles.Join(_context.Animes,
                     aa => aa.AnimeId,
@@ -39,7 +40,7 @@ namespace Shinsekai_API.Controllers
                         Article = a
                     }).Select(a => a.Article).ToList();
             }
-            if (req.ByMaterial)
+            if (byMaterial)
             {
                 dbArticles = _context.MaterialsArticles.Join(_context.Materials,
                     m => m.MaterialId,
@@ -57,7 +58,7 @@ namespace Shinsekai_API.Controllers
                         Article = a
                     }).Select(a => a.Article).ToList();
             }
-            if (req.ByLine)
+            if (byLine)
             {
                 dbArticles = _context.LinesArticles.Join(_context.Lines,
                     la => la.LineId,
@@ -74,6 +75,13 @@ namespace Shinsekai_API.Controllers
                         LineArticle = la,
                         Article = a
                     }).Select(a => a.Article).ToList();
+            }
+
+            if (search != null)
+            {
+                dbArticles = dbArticles.Where(a => a.Name.Trim().ToLower()
+                    .Contains(search.Trim().ToLower()))
+                    .ToList();
             }
             
             return Ok(new

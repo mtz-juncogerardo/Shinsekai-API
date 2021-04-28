@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +9,7 @@ using Shinsekai_API.Models;
 namespace Shinsekai_API.Controllers
 {
     [ApiController]
-    [Route("admin")]
+    [Route("api/admin")]
     public class AdminController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
@@ -35,5 +36,28 @@ namespace Shinsekai_API.Controllers
                 Result = "Thank you"
             });
         }
+
+        [Authorize]
+        [HttpPost("questions")]
+        public IActionResult SaveQuestion([FromBody] QuestionItem question)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context))
+            {
+                return Unauthorized(new
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            question.Id = Guid.NewGuid().ToString();
+            _context.Questions.Add(question);
+            _context.SaveChanges();
+            
+            return Ok(new
+            {
+                Result = "New Question Published"
+            });
+        }
+
     }
 }

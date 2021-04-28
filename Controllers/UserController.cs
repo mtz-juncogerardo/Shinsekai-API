@@ -95,18 +95,18 @@ namespace Shinsekai_API.Controllers
                         Points = p,
                         User = u
                     }).Where(pu => pu.User.Id == id)
-                .Select(pu => pu.Points);
-            var expiredPoints = dbPoints.Where(p => p.ExpirationDate < DateTime.Now).ToList();
-            var validPoints = dbPoints.Where(p => p.ExpirationDate >= DateTime.Now).ToList();
+                .Select(pu => pu.Points)
+                .OrderBy(p => p.ExpirationDate).ToList();
+            var expiredPoints = dbPoints.Where(p => p.ExpirationDate < DateTime.Now).Sum(p => p.Amount);
+            var validPoints = dbPoints.Where(p => p.ExpirationDate >= DateTime.Now).Sum(p => p.Amount);
 
             return Ok(new
             {
                 Result = new PointResponse()
                 {
-                    ExpiredPoints = expiredPoints,
-                    ValidPoints = validPoints,
-                    TotalExpired = expiredPoints.Sum(p => (int)p.Amount),
-                    TotalValid = validPoints.Sum(p => (int)p.Amount)
+                    Points = dbPoints,
+                    TotalExpired = expiredPoints,
+                    TotalValid = validPoints
                 }
             });
         }
@@ -128,14 +128,14 @@ namespace Shinsekai_API.Controllers
                     a => a.Id,
                     (pa, a) => new
                     {
-                        PurchaseArticle = pa.PurchaseArticle,
+                        pa.PurchaseArticle,
                         Article = a
                     }).Where(paa => paa.PurchaseArticle.Purchase.UserId == id)
                 .Select(paa => new
                 {
-                    PurchaseId = paa.PurchaseArticle.PurchaseId,
-                    Date = paa.PurchaseArticle.Purchase.Date,
-                    Article = paa.PurchaseArticle.Article
+                    paa.PurchaseArticle.PurchaseId,
+                    paa.PurchaseArticle.Purchase.Date,
+                    paa.PurchaseArticle.Article
                 }).OrderBy(p => p.PurchaseId).ToList()
                 .GroupBy(p => p.PurchaseId);
 

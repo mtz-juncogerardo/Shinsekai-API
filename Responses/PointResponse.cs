@@ -5,9 +5,8 @@ namespace Shinsekai_API.Responses
 {
     public class PointResponse
     {
-        public List<PointItem> ExpiredPoints { get; set; }
-        public List<PointItem> ValidPoints { get; set; }
-        public int TotalValid { get; set; }
-        public int TotalExpired { get; set; }
+        public List<PointItem> Points { get; set; }
+        public decimal TotalValid { get; set; }
+        public decimal TotalExpired { get; set; }
     }
 }
