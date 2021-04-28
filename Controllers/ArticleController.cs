@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Shinsekai_API.Models;
 using Shinsekai_API.Requests;
+using Shinsekai_API.Responses;
 
 namespace Shinsekai_API.Controllers
 {
@@ -11,6 +13,7 @@ namespace Shinsekai_API.Controllers
     public class ArticleController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
+        private const int _numberOfElementsInPage = 20;
 
         public ArticleController(ShinsekaiApiContext context)
         {
@@ -18,10 +21,12 @@ namespace Shinsekai_API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetArticles([FromQuery] string search, bool byAnime, bool byMaterial, bool byLine)
+        public IActionResult GetArticles([FromQuery] string page, string search, bool byName, bool byAnime, bool byMaterial, bool byLine)
         {
-            var dbArticles = new List<ArticleItem>();
-            
+            var pageNum = page == null ? 1 : int.Parse(page);
+            var elementsToSkip = (pageNum - 1) * _numberOfElementsInPage;
+            var dbArticles = _context.Articles.ToList();
+
             if (byAnime)
             {
                 dbArticles = _context.AnimesArticles.Join(_context.Animes,
@@ -80,13 +85,20 @@ namespace Shinsekai_API.Controllers
             if (search != null)
             {
                 dbArticles = dbArticles.Where(a => a.Name.Trim().ToLower()
-                    .Contains(search.Trim().ToLower()))
+                        .Contains(search.Trim().ToLower()))
                     .ToList();
             }
-            
-            return Ok(new
+
+            var responseArticles = dbArticles.Skip(elementsToSkip).Take(_numberOfElementsInPage);
+            var count = dbArticles.Count();
+            var maxPages = (int)Math.Ceiling(count / (decimal)_numberOfElementsInPage);
+
+            return Ok(new OkResponse()
             {
-                Result = dbArticles
+                Response = responseArticles,
+                Count = responseArticles.Count(),
+                Page = pageNum,
+                MaxPage = maxPages
             });
         }
     }
