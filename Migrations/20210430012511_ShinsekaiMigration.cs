@@ -82,6 +82,19 @@ namespace Shinsekai_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "OriginalsReplicas",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    OriginalArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    ReplicaArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OriginalsReplicas", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Promotions",
                 columns: table => new
                 {
@@ -132,31 +145,6 @@ namespace Shinsekai_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Articles",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Height = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    DiscountPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Stock = table.Column<int>(type: "int", nullable: false),
-                    Replica = table.Column<bool>(type: "bit", nullable: false),
-                    Details = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    BrandId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Articles", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Articles_Brands_BrandId",
-                        column: x => x.BrandId,
-                        principalTable: "Brands",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Deliveries",
                 columns: table => new
                 {
@@ -172,6 +160,39 @@ namespace Shinsekai_API.Migrations
                         name: "FK_Deliveries_Locations_LocationId",
                         column: x => x.LocationId,
                         principalTable: "Locations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Articles",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Height = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DiscountPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Stock = table.Column<int>(type: "int", nullable: false),
+                    OriginalFlag = table.Column<bool>(type: "bit", nullable: false),
+                    OriginalReplicaId = table.Column<string>(type: "nvarchar(36)", nullable: false),
+                    Details = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    DateAdded = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    BrandId = table.Column<string>(type: "nvarchar(36)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Articles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Articles_Brands_BrandId",
+                        column: x => x.BrandId,
+                        principalTable: "Brands",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Articles_OriginalsReplicas_OriginalReplicaId",
+                        column: x => x.OriginalReplicaId,
+                        principalTable: "OriginalsReplicas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -329,42 +350,6 @@ namespace Shinsekai_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Originals",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
-                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Originals", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Originals_Articles_ArticleId",
-                        column: x => x.ArticleId,
-                        principalTable: "Articles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Replicas",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
-                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Replicas", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Replicas_Articles_ArticleId",
-                        column: x => x.ArticleId,
-                        principalTable: "Articles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Sales",
                 columns: table => new
                 {
@@ -496,9 +481,13 @@ namespace Shinsekai_API.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Articles_BrandId",
                 table: "Articles",
-                column: "BrandId",
-                unique: true,
-                filter: "[BrandId] IS NOT NULL");
+                column: "BrandId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Articles_OriginalReplicaId",
+                table: "Articles",
+                column: "OriginalReplicaId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Deliveries_LocationId",
@@ -542,11 +531,6 @@ namespace Shinsekai_API.Migrations
                 column: "MaterialId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Originals_ArticleId",
-                table: "Originals",
-                column: "ArticleId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Points_UserId",
                 table: "Points",
                 column: "UserId");
@@ -565,11 +549,6 @@ namespace Shinsekai_API.Migrations
                 name: "IX_PurchasesArticles_PurchaseId",
                 table: "PurchasesArticles",
                 column: "PurchaseId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Replicas_ArticleId",
-                table: "Replicas",
-                column: "ArticleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Requests_PurchaseId",
@@ -622,9 +601,6 @@ namespace Shinsekai_API.Migrations
                 name: "MaterialsArticles");
 
             migrationBuilder.DropTable(
-                name: "Originals");
-
-            migrationBuilder.DropTable(
                 name: "Points");
 
             migrationBuilder.DropTable(
@@ -635,9 +611,6 @@ namespace Shinsekai_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Questions");
-
-            migrationBuilder.DropTable(
-                name: "Replicas");
 
             migrationBuilder.DropTable(
                 name: "Requests");
@@ -671,6 +644,9 @@ namespace Shinsekai_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Brands");
+
+            migrationBuilder.DropTable(
+                name: "OriginalsReplicas");
 
             migrationBuilder.DropTable(
                 name: "AuthParams");

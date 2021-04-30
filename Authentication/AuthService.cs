@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
@@ -34,17 +35,17 @@ namespace Shinsekai_API.Authentication
            return id;
         }
 
-        public static bool AuthorizeAdmin(IIdentity identity, ShinsekaiApiContext context)
+        public static bool AuthorizeAdmin(IIdentity identity, List<UserItem> users)
         {
             var id = IdentifyUser(identity);
-            var dbAdminUser = context.Users.FirstOrDefault(u => u.Id == id);
+            var dbAdminUser = users.FirstOrDefault(u => u.Id == id);
             
             if (dbAdminUser is not {Admin: true})
             {
-                return false;
+                return true;
             }
 
-            return true;
+            return false;
         }
     }
 }

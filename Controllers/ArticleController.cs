@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shinsekai_API.Authentication;
 using Shinsekai_API.Models;
 using Shinsekai_API.Requests;
 using Shinsekai_API.Responses;
@@ -101,5 +103,168 @@ namespace Shinsekai_API.Controllers
                 MaxPage = maxPages
             });
         }
+
+        [Authorize]
+        [HttpPost("create")]
+        public IActionResult SaveArticle([FromBody] ArticleItem article)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            if (article.BrandId == null)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "Necesitas especificar una marca"
+                });
+            }
+
+            article.Id = Guid.NewGuid().ToString();
+
+            if (article.OriginalFlag)
+            {
+                var original = new OriginalItem()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Article = article
+                };
+                _context.Originals.Add(original);
+            }
+            else
+            {
+                _context.Articles.Add(article);
+            }
+
+            _context.SaveChanges();
+
+            return Ok(new OkResponse()
+            {
+                Response = "Article Published"
+            });
+        }
+
+        [HttpGet("read")]
+        public IActionResult GetArticleById([FromQuery] string id)
+        {
+            var dbArticle = _context.Articles.FirstOrDefault(a => a.Id == id);
+            if (dbArticle == null)
+            {
+                return NotFound(new ErrorResponse()
+                {
+                    Error = "El articulo que intentabas ver ya no existe"
+                });
+            }
+
+            return Ok(new OkResponse()
+            {
+                Response = dbArticle,
+                Count = 1,
+                Page = 1,
+                MaxPage = 1
+            });
+        }
+
+
+        [Authorize]
+        [HttpPut("update")]
+        public IActionResult UpdateItem([FromBody] ArticleItem article)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            if (article.Id == null)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "No se especifico un articulo a editar"
+                });
+            }
+
+            var entityExistsFlag = _context.Articles.Any(a => a.Id == article.Id);
+
+            if (!entityExistsFlag)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "Article Invalid"
+                });
+            }
+
+            if (article.OriginalFlag)
+            {
+                var original = new OriginalItem()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ArticleId = article.Id
+                };
+                article.OriginalSerial = null;
+                _context.Add(original);
+            }
+
+            if (!article.OriginalFlag)
+            {
+                var original = _context.Originals.Where(o => o.ArticleId == article.Id);
+                _context.Remove(original);
+            }
+
+            _context.Update(article);
+            _context.SaveChanges();
+
+            return Ok(new OkResponse()
+            {
+                Response = "El articulo se actualizo con exito"
+            });
+        }
+
+        [Authorize]
+        [HttpDelete("delete")]
+        public IActionResult DeleteArticle([FromQuery] string id)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            if (id == null)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "No se especifico un articulo a editar"
+                });
+            }
+
+            var dbArticle = _context.Articles.FirstOrDefault(a => a.Id == id);
+
+            if (dbArticle == null)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "El Articulo que intentas eliminar ya no existe"
+                });
+            }
+
+            _context.Remove(dbArticle);
+            _context.SaveChanges();
+
+            return Ok(new OkResponse()
+            {
+                Response = "El articulo se elimino con exito"
+            });
+        }
+
+
     }
 }

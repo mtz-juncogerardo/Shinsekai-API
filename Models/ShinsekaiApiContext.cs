@@ -23,7 +23,6 @@ namespace Shinsekai_API.Models
         public DbSet<MaterialItem> Materials { get; set; }
         public DbSet<MaterialArticleItem> MaterialsArticles { get; set; }
         public DbSet<OriginalItem> Originals { get; set; }
-        public DbSet<ReplicaItem> Replicas { get; set; }
         public DbSet<PointItem> Points { get; set; }
         public DbSet<PromotionItem> Promotions { get; set; }
         public DbSet<PurchaseItem> Purchases { get; set; }

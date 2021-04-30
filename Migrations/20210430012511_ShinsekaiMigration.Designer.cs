@@ -10,7 +10,7 @@ using Shinsekai_API.Models;
 namespace Shinsekai_API.Migrations
 {
     [DbContext(typeof(ShinsekaiApiContext))]
-    [Migration("20210425165930_ShinsekaiMigration")]
+    [Migration("20210430012511_ShinsekaiMigration")]
     partial class ShinsekaiMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -18,7 +18,7 @@ namespace Shinsekai_API.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "6.0.0-preview.3.21201.2")
+                .HasAnnotation("ProductVersion", "5.0.5")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("Shinsekai_API.Models.AnimeArticleItem", b =>
@@ -74,8 +74,11 @@ namespace Shinsekai_API.Migrations
                         .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("BrandId")
-                        .HasMaxLength(36)
+                        .IsRequired()
                         .HasColumnType("nvarchar(36)");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Details")
                         .HasMaxLength(200)
@@ -92,20 +95,25 @@ namespace Shinsekai_API.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<bool>("OriginalFlag")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OriginalReplicaId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(36)");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<bool>("Replica")
-                        .HasColumnType("bit");
 
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BrandId")
-                        .IsUnique()
-                        .HasFilter("[BrandId] IS NOT NULL");
+                    b.HasIndex("BrandId");
+
+                    b.HasIndex("OriginalReplicaId")
+                        .IsUnique();
 
                     b.ToTable("Articles");
                 });
@@ -340,22 +348,25 @@ namespace Shinsekai_API.Migrations
                     b.ToTable("Materials");
                 });
 
-            modelBuilder.Entity("Shinsekai_API.Models.OriginalItem", b =>
+            modelBuilder.Entity("Shinsekai_API.Models.OriginalReplicaItem", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
-                    b.Property<string>("ArticleId")
+                    b.Property<string>("OriginalArticleId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
+
+                    b.Property<string>("ReplicaArticleId")
                         .IsRequired()
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ArticleId");
-
-                    b.ToTable("Originals");
+                    b.ToTable("OriginalsReplicas");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.PointItem", b =>
@@ -467,24 +478,6 @@ namespace Shinsekai_API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Questions");
-                });
-
-            modelBuilder.Entity("Shinsekai_API.Models.ReplicaItem", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasMaxLength(36)
-                        .HasColumnType("nvarchar(36)");
-
-                    b.Property<string>("ArticleId")
-                        .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("nvarchar(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ArticleId");
-
-                    b.ToTable("Replicas");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.RequestItem", b =>
@@ -633,10 +626,20 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.ArticleItem", b =>
                 {
                     b.HasOne("Shinsekai_API.Models.BrandItem", "Brand")
+                        .WithMany("Articles")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Shinsekai_API.Models.OriginalReplicaItem", "OriginalReplica")
                         .WithOne("Article")
-                        .HasForeignKey("Shinsekai_API.Models.ArticleItem", "BrandId");
+                        .HasForeignKey("Shinsekai_API.Models.ArticleItem", "OriginalReplicaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Brand");
+
+                    b.Navigation("OriginalReplica");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.DeliveryItem", b =>
@@ -718,17 +721,6 @@ namespace Shinsekai_API.Migrations
                     b.Navigation("Material");
                 });
 
-            modelBuilder.Entity("Shinsekai_API.Models.OriginalItem", b =>
-                {
-                    b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
-                        .WithMany("Originals")
-                        .HasForeignKey("ArticleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Article");
-                });
-
             modelBuilder.Entity("Shinsekai_API.Models.PointItem", b =>
                 {
                     b.HasOne("Shinsekai_API.Models.UserItem", "User")
@@ -768,17 +760,6 @@ namespace Shinsekai_API.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Shinsekai_API.Models.ReplicaItem", b =>
-                {
-                    b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
-                        .WithMany("Replicas")
-                        .HasForeignKey("ArticleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Article");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.RequestItem", b =>
@@ -848,11 +829,7 @@ namespace Shinsekai_API.Migrations
 
                     b.Navigation("MaterialsArticles");
 
-                    b.Navigation("Originals");
-
                     b.Navigation("PurchasesArticles");
-
-                    b.Navigation("Replicas");
 
                     b.Navigation("Sales");
 
@@ -866,7 +843,7 @@ namespace Shinsekai_API.Migrations
 
             modelBuilder.Entity("Shinsekai_API.Models.BrandItem", b =>
                 {
-                    b.Navigation("Article");
+                    b.Navigation("Articles");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.LineItem", b =>
@@ -882,6 +859,11 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.MaterialItem", b =>
                 {
                     b.Navigation("Materials");
+                });
+
+            modelBuilder.Entity("Shinsekai_API.Models.OriginalReplicaItem", b =>
+                {
+                    b.Navigation("Article");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.PurchaseItem", b =>
