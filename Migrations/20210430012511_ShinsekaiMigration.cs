@@ -493,7 +493,7 @@ namespace Shinsekai_API.Migrations
                 name: "IX_Deliveries_LocationId",
                 table: "Deliveries",
                 column: "LocationId",
-                unique: true);
+                unique: false);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Favorites_ArticleId",

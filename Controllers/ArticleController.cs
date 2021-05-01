@@ -242,7 +242,7 @@ namespace Shinsekai_API.Controllers
             {
                 return BadRequest(new ErrorResponse()
                 {
-                    Error = "No se especifico un articulo a editar"
+                    Error = "No se especifico un articulo para eliminar"
                 });
             }
 
