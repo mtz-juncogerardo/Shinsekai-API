@@ -9,6 +9,7 @@ namespace Shinsekai_API.Services
 {
     public class PaymentService : PaymentRequest
     {
+        private const string Currency = "mxn";
         public List<SessionLineItemOptions> LineItems { get; }
 
         public PaymentService(PaymentRequest payment)
@@ -26,7 +27,7 @@ namespace Shinsekai_API.Services
                     PriceData = new SessionLineItemPriceDataOptions
                     {
                         UnitAmount = Convert.ToInt64(article.Price),
-                        Currency = "usd",
+                        Currency = Currency,
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
                             Name = article.Name,
