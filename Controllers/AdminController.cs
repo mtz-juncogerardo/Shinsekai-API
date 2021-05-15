@@ -20,9 +20,39 @@ namespace Shinsekai_API.Controllers
             _context = context;
         }
 
+        [Authorize]
+        [HttpGet("questions/read")]
+        public IActionResult GetQuestions([FromQuery] string id)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            var dbQuestion = _context.Questions.ToList();
+            if (id == null)
+            {
+                return Ok(new OkResponse()
+                {
+                    Response = dbQuestion,
+                    Count = dbQuestion.Count,
+                    Page = 1,
+                    MaxPage = 1
+                });
+            }
+            
+            var dbResponse = dbQuestion.Where(r => r.Id == id);
+            return Ok(new OkResponse()
+            {
+                Response = dbResponse
+            });
+        }
 
         [Authorize]
-        [HttpPost("questions")]
+        [HttpPost("questions/create")]
         public IActionResult SaveQuestion([FromBody] QuestionItem question)
         {
             if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
@@ -37,14 +67,92 @@ namespace Shinsekai_API.Controllers
             _context.Questions.Add(question);
             _context.SaveChanges();
 
-            return Ok(new
+            return Ok(new OkResponse()
             {
-                Result = "New Question Published"
+                Response = "New Question Published"
+            });
+        }
+
+        [Authorize]
+        [HttpPut("questions/update")]
+        public IActionResult UpdateQuestion([FromBody] QuestionItem question)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            if (question.Id == null)
+            {
+                return BadRequest(new ErrorResponse() 
+                {
+                    Error = "Id not specified"
+                });
+            }
+            
+            var entityExistsFlag = _context.Questions.Any(q => q.Id == question.Id);
+
+            if (!entityExistsFlag)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "Question Invalid Id"
+                });
+            }
+            
+            _context.Update(question);
+            _context.SaveChanges();
+
+            return Ok(new OkResponse()
+            {
+                Response = "Question has been updated"
             });
         }
         
         [Authorize]
-        [HttpPost("location")]
+        [HttpDelete("questions/delete")]
+        public IActionResult DeleteQuestion([FromQuery] string id)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            if (id == null)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "No se especifico una pregunta para eliminar"
+                });
+            }
+
+            var dbQuestion = _context.Questions.FirstOrDefault(q => q.Id == id);
+
+            if (dbQuestion == null)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "El Articulo que intentas eliminar ya no existe"
+                });
+            }
+
+            _context.Remove(dbQuestion);
+            _context.SaveChanges();
+
+            return Ok(new OkResponse()
+            {
+                Response = "La pregunta se elimino con exito"
+            });
+        }
+        
+        [Authorize]
+        [HttpPost("locations/create")]
         public IActionResult SaveLocation(LocationItem location)
         {
             if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
@@ -64,5 +172,115 @@ namespace Shinsekai_API.Controllers
                 Response = "Location was added succesfully"
             });
         }
+        
+        [Authorize]
+        [HttpGet("locations/read")]
+        public IActionResult GetLocations([FromQuery] string id)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            var dbLocation = _context.Locations.ToList();
+            if (id == null)
+            {
+                return Ok(new OkResponse()
+                {
+                    Response = dbLocation,
+                    Count = dbLocation.Count,
+                    Page = 1,
+                    MaxPage = 1
+                });
+            }
+            
+            var dbResponse = dbLocation.Where(l => l.Id == id);
+            return Ok(new OkResponse()
+            {
+                Response = dbResponse
+            });
+        }
+
+        [Authorize]
+        [HttpPut("locations/update")]
+        public IActionResult Updatelocation([FromBody] LocationItem location)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            if (location.Id == null)
+            {
+                return BadRequest(new ErrorResponse() 
+                {
+                    Error = "Id not specified"
+                });
+            }
+            
+            var entityExistsFlag = _context.Locations.Any(q => q.Id == location.Id);
+
+            if (!entityExistsFlag)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "location Invalid Id"
+                });
+            }
+            
+            _context.Update(location);
+            _context.SaveChanges();
+
+            return Ok(new OkResponse()
+            {
+                Response = "location has been updated"
+            });
+        }
+        
+        [Authorize]
+        [HttpDelete("delete")]
+        public IActionResult Deletelocation([FromQuery] string id)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            if (id == null)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "No se especifico una pregunta para eliminar"
+                });
+            }
+
+            var dbLocation = _context.Locations.FirstOrDefault(q => q.Id == id);
+
+            if (dbLocation == null)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "El Articulo que intentas eliminar ya no existe"
+                });
+            }
+
+            _context.Remove(dbLocation);
+            _context.SaveChanges();
+
+            return Ok(new OkResponse()
+            {
+                Response = "La pregunta se elimino con exito"
+            });
+        }
+        
     }
 }
