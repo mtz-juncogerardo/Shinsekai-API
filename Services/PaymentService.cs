@@ -20,7 +20,7 @@ namespace Shinsekai_API.Services
             ErrorUrl = payment.ErrorUrl;
         }
 
-        public List<SessionLineItemOptions> CreateLineItems()
+        private List<SessionLineItemOptions> CreateLineItems()
         {
             return Articles.Select(article => new SessionLineItemOptions
                 {

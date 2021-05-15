@@ -70,12 +70,12 @@ namespace Shinsekai_API.Controllers
             foreach (var purchaseArticle in purchase.PurchasesArticles)
             {
                 var articleId = purchaseArticle.ArticleId ?? purchaseArticle.Article.Id;
-                var dbArticle = _context.Articles.Where(a => a.Id == articleId);
-                if (!dbArticle.Any())
+                var dbArticle = _context.Articles.FirstOrDefault(a => a.Id == articleId);
+                if (dbArticle is not {Stock: > 0})
                 {
                     return BadRequest(new ErrorResponse() 
                     {
-                        Error = "Some articles does not exists defined : ID"
+                        Error = "Some articles arent in stock anymore or doesnt exist"
                     });
                 }
                 
@@ -88,8 +88,10 @@ namespace Shinsekai_API.Controllers
                 purchaseArticle.ArticleId = articleId;
                 purchaseArticle.Id = Guid.NewGuid().ToString();
                 purchaseArticle.Purchase = purchase;
+                dbArticle.Stock--;
 
                 _context.Sales.Add(sale);
+                _context.Articles.Update(dbArticle);
                 _context.PurchasesArticles.Add(purchaseArticle);
             }
 
