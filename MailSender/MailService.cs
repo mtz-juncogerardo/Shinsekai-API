@@ -1,30 +1,34 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using System.Threading.Tasks;
 
 namespace Shinsekai_API.MailSender
 {
     public abstract class MailService
     {
-        public string ReciverEmail { get; set; }
-        public string Subject { get; set; }
-        public string Template { get; set; }
+        private readonly string _receiverEmail;
+        private readonly string _subject;
+
+        protected MailService(string subject, string receiverEmail)
+        {
+            _subject = subject;
+            _receiverEmail = receiverEmail;
+        }
 
         public void SendEmail()
         {
-            MailMessage message = new MailMessage("gerardo@mtzjunco.com", ReciverEmail);
-            message.Subject = Subject;
-            message.Body = GetEmailTemplate();
-            message.IsBodyHtml = true;
-            SmtpClient client = new SmtpClient("mail.privateemail.com");
-
-            client.Credentials = new NetworkCredential("gerardo@mtzjunco.com", "C0dyng99");
-            client.Port = 587;
-            client.EnableSsl = true;
-
+            var message = new MailMessage("gerardo@mtzjunco.com", _receiverEmail)
+            {
+                Subject = _subject,
+                Body = GetEmailTemplate(),
+                IsBodyHtml = true
+            };
+            var client = new SmtpClient("mail.privateemail.com")
+            {
+                Credentials = new NetworkCredential("gerardo@mtzjunco.com", "1#4%645fEkeld98&&dn9(d"),
+                Port = 587,
+                EnableSsl = true
+            };
             try
             {
                 client.Send(message);
@@ -32,10 +36,10 @@ namespace Shinsekai_API.MailSender
             catch (Exception ex)
             {
                 Console.WriteLine("Error: {0}",
-                            ex.ToString());
+                            ex);
             }
         }
 
-        public abstract string GetEmailTemplate();
+        protected abstract string GetEmailTemplate();
     }
 }

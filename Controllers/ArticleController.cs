@@ -24,7 +24,14 @@ namespace Shinsekai_API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetArticles([FromQuery] string page, string search, string id, bool byAnime, bool byMaterial, bool byLine, bool byBrand)
+        public IActionResult GetArticles([FromQuery] string page,
+            string search,
+            string id,
+            bool byAnime,
+            bool byMaterial,
+            bool byLine,
+            bool byBrand,
+            bool orderBySales)
         {
             var pageNum = page == null ? 1 : int.Parse(page);
             var elementsToSkip = (pageNum - 1) * _numberOfElementsInPage;
@@ -34,64 +41,64 @@ namespace Shinsekai_API.Controllers
             {
                 dbArticles = _context.Articles.Where(a => a.BrandId == id).ToList();
             }
-            
+
             if (byAnime)
             {
                 dbArticles = _context.AnimesArticles.Join(_context.Animes,
-                    aa => aa.AnimeId,
-                    a => a.Id,
-                    (aa, a) => new
-                    {
-                        AnimeArticle = aa,
-                        Anime = a
-                    }).Join(_context.Articles,
-                    aaa => aaa.AnimeArticle.ArticleId,
-                    a => a.Id,
-                    (aaa, a) => new
-                    {
-                        AnimeArticleAnime = aaa,
-                        Article = a
-                    }).Where(a => a.AnimeArticleAnime.AnimeArticle.AnimeId == id)
+                        aa => aa.AnimeId,
+                        a => a.Id,
+                        (aa, a) => new
+                        {
+                            AnimeArticle = aa,
+                            Anime = a
+                        }).Join(_context.Articles,
+                        aaa => aaa.AnimeArticle.ArticleId,
+                        a => a.Id,
+                        (aaa, a) => new
+                        {
+                            AnimeArticleAnime = aaa,
+                            Article = a
+                        }).Where(a => a.AnimeArticleAnime.AnimeArticle.AnimeId == id)
                     .Select(a => a.Article).ToList();
             }
-            
+
             if (byMaterial)
             {
                 dbArticles = _context.MaterialsArticles.Join(_context.Materials,
-                    m => m.MaterialId,
-                    a => a.Id,
-                    (m, a) => new
-                    {
-                        MaterialArticle = m,
-                        Material = a
-                    }).Join(_context.Articles,
-                    ma => ma.MaterialArticle.ArticleId,
-                    a => a.Id,
-                    (ma, a) => new
-                    {
-                        MaterialArticle = ma,
-                        Article = a
-                    }).Where(a => a.MaterialArticle.MaterialArticle.MaterialId == id)
+                        m => m.MaterialId,
+                        a => a.Id,
+                        (m, a) => new
+                        {
+                            MaterialArticle = m,
+                            Material = a
+                        }).Join(_context.Articles,
+                        ma => ma.MaterialArticle.ArticleId,
+                        a => a.Id,
+                        (ma, a) => new
+                        {
+                            MaterialArticle = ma,
+                            Article = a
+                        }).Where(a => a.MaterialArticle.MaterialArticle.MaterialId == id)
                     .Select(a => a.Article).ToList();
             }
-            
+
             if (byLine)
             {
                 dbArticles = _context.LinesArticles.Join(_context.Lines,
-                    la => la.LineId,
-                    l => l.Id,
-                    (la, l) => new
-                    {
-                        LineArticle = la,
-                        Line = l
-                    }).Join(_context.Articles,
-                    la => la.LineArticle.ArticleId,
-                    a => a.Id,
-                    (la, a) => new
-                    {
-                        LineArticle = la,
-                        Article = a
-                    }).Where(a => a.LineArticle.LineArticle.LineId == id)
+                        la => la.LineId,
+                        l => l.Id,
+                        (la, l) => new
+                        {
+                            LineArticle = la,
+                            Line = l
+                        }).Join(_context.Articles,
+                        la => la.LineArticle.ArticleId,
+                        a => a.Id,
+                        (la, a) => new
+                        {
+                            LineArticle = la,
+                            Article = a
+                        }).Where(a => a.LineArticle.LineArticle.LineId == id)
                     .Select(a => a.Article).ToList();
             }
 
@@ -102,9 +109,20 @@ namespace Shinsekai_API.Controllers
                     .ToList();
             }
 
+
+            if (orderBySales)
+            {
+                dbArticles = dbArticles.Select(a => new
+                    {
+                        Article = a,
+                        Total = a.Sales.Count
+                    }).OrderByDescending(r => r.Total)
+                    .Select(a => a.Article).ToList();
+            }
+
+            var articleCount = dbArticles.Count;
+            var maxPages = (int)Math.Ceiling(articleCount / (decimal)_numberOfElementsInPage);
             var responseArticles = dbArticles.Skip(elementsToSkip).Take(_numberOfElementsInPage);
-            var count = dbArticles.Count();
-            var maxPages = (int)Math.Ceiling(count / (decimal)_numberOfElementsInPage);
 
             return Ok(new OkResponse()
             {

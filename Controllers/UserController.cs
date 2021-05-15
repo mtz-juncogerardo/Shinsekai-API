@@ -76,9 +76,9 @@ namespace Shinsekai_API.Controllers
                     }).Where(fu => fu.User.Id == id)
                 .Select(fu => fu.Favorites);
 
-            return Ok(new
+            return Ok(new OkResponse()
             {
-                Result = dbFavorites
+                Response = dbFavorites
             });
         }
 

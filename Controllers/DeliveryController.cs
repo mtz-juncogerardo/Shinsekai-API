@@ -20,20 +20,40 @@ namespace Shinsekai_API.Controllers
             _context = context;
         }
 
-        [HttpGet]
-        public IActionResult GetDeliveries()
+        [Authorize]
+        [HttpGet("read")]
+        public IActionResult GetDeliveries([FromQuery] string id)
         {
-            var dbDeliveries = _context.Deliveries.ToList();
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
 
+            var dbDelivery = _context.Deliveries.ToList();
+            if (id == null)
+            {
+                return Ok(new OkResponse()
+                {
+                    Response = dbDelivery,
+                    Count = dbDelivery.Count,
+                    Page = 1,
+                    MaxPage = 1
+                });
+            }
+
+            var dbResponse = dbDelivery.Where(r => r.Id == id);
             return Ok(new OkResponse()
             {
-                Response = dbDeliveries
+                Response = dbResponse
             });
         }
 
         [Authorize]
         [HttpPost("create")]
-        public IActionResult SaveDelivery(DeliveryItem delivery)
+        public IActionResult SaveDelivery([FromBody] DeliveryItem delivery)
         {
             if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
             {
@@ -49,41 +69,13 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "Delivery Added succesfully"
-            });
-        }
-
-        [Authorize]
-        [HttpGet("read")]
-        public IActionResult GetDeliveryById([FromQuery] string id)
-        {
-            if (id == null)
-            {
-                return BadRequest(new ErrorResponse()
-                {
-                    Error = "No se especifico una entrega"
-                });
-            }
-
-            var dbDelivery = _context.Deliveries.FirstOrDefault(d => d.Id == id);
-
-            if (dbDelivery == null)
-            {
-                return NotFound(new ErrorResponse()
-                {
-                    Error = "La entregaa no existe"
-                });
-            }
-
-            return Ok(new OkResponse()
-            {
-                Response = dbDelivery
+                Response = "New Delivery Published"
             });
         }
 
         [Authorize]
         [HttpPut("update")]
-        public IActionResult UpdateDelivery([FromBody] DeliveryRequest delivery)
+        public IActionResult UpdateDelivery([FromBody] DeliveryItem delivery)
         {
             if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
             {
@@ -93,26 +85,30 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            var dbDelivery = _context.Deliveries.FirstOrDefault(d => d.Id == delivery.Id);
-
-            if (dbDelivery is null || delivery is null)
+            if (delivery.Id == null)
             {
                 return BadRequest(new ErrorResponse()
                 {
-                    Error = "La entrega a editar ya no existe"
+                    Error = "Id not specified"
                 });
             }
 
-            dbDelivery.Parcel = delivery.Parcel ?? dbDelivery.Parcel;
-            dbDelivery.LocationId = delivery.LocationId ?? dbDelivery.LocationId;
-            dbDelivery.EstimatedDays = delivery.EstimatedDays == 0 ? dbDelivery.EstimatedDays : delivery.EstimatedDays;
-            
-            _context.Update(dbDelivery);
+            var entityExistsFlag = _context.Deliveries.Any(q => q.Id == delivery.Id);
+
+            if (!entityExistsFlag)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "Delivery Invalid Id"
+                });
+            }
+
+            _context.Update(delivery);
             _context.SaveChanges();
 
             return Ok(new OkResponse()
             {
-                Response = "La entrega se actualizo con exito"
+                Response = "Delivery has been updated"
             });
         }
 
@@ -132,17 +128,17 @@ namespace Shinsekai_API.Controllers
             {
                 return BadRequest(new ErrorResponse()
                 {
-                    Error = "No se especifico una entrega para eliminar"
+                    Error = "No se especifico una delivery para eliminar"
                 });
             }
 
-            var dbDelivery = _context.Deliveries.FirstOrDefault(d => d.Id == id);
+            var dbDelivery = _context.Deliveries.FirstOrDefault(q => q.Id == id);
 
             if (dbDelivery == null)
             {
-                return NotFound(new ErrorResponse()
+                return BadRequest(new ErrorResponse()
                 {
-                    Error = "La Entrega No existe"
+                    Error = "El Delivery que intentas eliminar ya no existe"
                 });
             }
 
@@ -151,9 +147,8 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "La Entrega se elimino con exito"
+                Response = "La delivery se elimino con exito"
             });
         }
-
     }
 }

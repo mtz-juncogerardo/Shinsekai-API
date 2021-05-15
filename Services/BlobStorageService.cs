@@ -12,7 +12,7 @@ namespace Shinsekai_API.Services
 
         public BlobStorageService(string containerName)
         {
-            _storageAccount = CloudStorageAccount.Parse(APIConfiguration.SvrConnectionString);
+            _storageAccount = CloudStorageAccount.Parse(ApiConfiguration.SvrConnectionString);
             _blobClient = _storageAccount.CreateCloudBlobClient();
             _blobContainer = _blobClient.GetContainerReference(containerName);
         }

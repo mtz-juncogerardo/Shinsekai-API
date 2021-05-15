@@ -40,7 +40,7 @@ namespace Shinsekai_API
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(APIConfiguration.JwtSecretKey)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ApiConfiguration.JwtSecretKey)),
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
@@ -48,7 +48,7 @@ namespace Shinsekai_API
                     ValidAudience = "https://localhost:5001"
                 };
             });
-            services.AddDbContext<ShinsekaiApiContext>(options => options.UseSqlServer(APIConfiguration.ConnectionString));
+            services.AddDbContext<ShinsekaiApiContext>(options => options.UseSqlServer(ApiConfiguration.ConnectionString));
             services.AddControllers();
             services.AddMvc()
                 .AddNewtonsoftJson(

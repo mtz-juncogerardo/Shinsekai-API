@@ -28,16 +28,12 @@ namespace Shinsekai_API.Authentication
         
         public bool ValidatePassword()
         {
-            if (_plainPassword != null &&
-                _plainPassword.Length > 8 &&
-                _plainPassword.Any(char.IsUpper) &&
-                _plainPassword.Any(char.IsNumber) &&
-                _plainPassword.Any(char.IsPunctuation))
-            {
-                return true;
-            }
+            return _plainPassword != null &&
+                   _plainPassword.Length > 8 &&
+                   _plainPassword.Any(char.IsUpper) &&
+                   _plainPassword.Any(char.IsNumber) &&
+                   _plainPassword.Any(char.IsPunctuation);
 
-            return false;
         }
 
         private string GetHashPassword()
@@ -53,7 +49,7 @@ namespace Shinsekai_API.Authentication
             return strongPassword;
         }
 
-        private string GetSaltQuery()
+        private static string GetSaltQuery()
         {
             var byteSalt = new byte[128 / 8];
             using (var rng = RandomNumberGenerator.Create())

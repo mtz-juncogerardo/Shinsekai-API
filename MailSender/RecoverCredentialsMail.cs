@@ -7,17 +7,17 @@ namespace Shinsekai_API.MailSender
 {
     public class RecoverCredentialsMail : MailService
     {
-        public string ButtonLink { get; set; }
-        public RecoverCredentialsMail(string reciverEmail, string buttonLink)
+        private const string Subject = "Shinsekai restablece tu contraseña";
+        private readonly string _buttonLink;
+        public RecoverCredentialsMail(string receiverEmail, string buttonLink)
+        : base(Subject, receiverEmail)
         {
-            ReciverEmail = reciverEmail;
-            ButtonLink = buttonLink;
-            Subject = "You requested your password";
+            _buttonLink = buttonLink;
         }
 
-        public override string GetEmailTemplate()
+        protected override string GetEmailTemplate()
         {
-            return $"<h1>To recover your account go to this link</h1><a href=\"{ButtonLink}\" target=__blank>{ButtonLink}</a>";
+            return $"<h1>To recover your account go to this link</h1><a href=\"{_buttonLink}\" target=__blank>{_buttonLink}</a>";
         }
     }
 }

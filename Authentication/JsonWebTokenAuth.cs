@@ -38,7 +38,7 @@ namespace Shinsekai_API.Authentication
         }
         private string GenerateJwtToken()
         {
-            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(APIConfiguration.JwtSecretKey));
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ApiConfiguration.JwtSecretKey));
             var loginCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha512);
             var tokenOptions = new JwtSecurityToken(
                 "https://localhost:5001",

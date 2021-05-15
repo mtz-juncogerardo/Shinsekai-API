@@ -5,6 +5,7 @@ namespace Shinsekai_API.Requests
 {
     public class ArticleRequest : ArticleItem
     {
-        public List<string> ImagePaths { get; set; }
+        public IEnumerable<string> ImagePaths { get; }
+        public int Quantity { get; }
     }
 }
