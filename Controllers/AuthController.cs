@@ -197,6 +197,5 @@ namespace Shinsekai_API.Controllers
                 Response = "Your data has been updated"
             });
         }
-
     }
 }

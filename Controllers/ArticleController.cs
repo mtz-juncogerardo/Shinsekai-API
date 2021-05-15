@@ -7,6 +7,7 @@ using Shinsekai_API.Authentication;
 using Shinsekai_API.Models;
 using Shinsekai_API.Requests;
 using Shinsekai_API.Responses;
+using Shinsekai_API.Services;
 
 namespace Shinsekai_API.Controllers
 {
@@ -23,12 +24,17 @@ namespace Shinsekai_API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetArticles([FromQuery] string page, string search, bool byName, bool byAnime, bool byMaterial, bool byLine)
+        public IActionResult GetArticles([FromQuery] string page, string search, string id, bool byAnime, bool byMaterial, bool byLine, bool byBrand)
         {
             var pageNum = page == null ? 1 : int.Parse(page);
             var elementsToSkip = (pageNum - 1) * _numberOfElementsInPage;
             var dbArticles = _context.Articles.ToList();
 
+            if (byBrand)
+            {
+                dbArticles = _context.Articles.Where(a => a.BrandId == id).ToList();
+            }
+            
             if (byAnime)
             {
                 dbArticles = _context.AnimesArticles.Join(_context.Animes,
@@ -45,8 +51,10 @@ namespace Shinsekai_API.Controllers
                     {
                         AnimeArticleAnime = aaa,
                         Article = a
-                    }).Select(a => a.Article).ToList();
+                    }).Where(a => a.AnimeArticleAnime.AnimeArticle.AnimeId == id)
+                    .Select(a => a.Article).ToList();
             }
+            
             if (byMaterial)
             {
                 dbArticles = _context.MaterialsArticles.Join(_context.Materials,
@@ -63,8 +71,10 @@ namespace Shinsekai_API.Controllers
                     {
                         MaterialArticle = ma,
                         Article = a
-                    }).Select(a => a.Article).ToList();
+                    }).Where(a => a.MaterialArticle.MaterialArticle.MaterialId == id)
+                    .Select(a => a.Article).ToList();
             }
+            
             if (byLine)
             {
                 dbArticles = _context.LinesArticles.Join(_context.Lines,
@@ -81,7 +91,8 @@ namespace Shinsekai_API.Controllers
                     {
                         LineArticle = la,
                         Article = a
-                    }).Select(a => a.Article).ToList();
+                    }).Where(a => a.LineArticle.LineArticle.LineId == id)
+                    .Select(a => a.Article).ToList();
             }
 
             if (search != null)
@@ -106,7 +117,7 @@ namespace Shinsekai_API.Controllers
 
         [Authorize]
         [HttpPost("create")]
-        public IActionResult SaveArticle([FromBody] ArticleItem article)
+        public IActionResult SaveArticle([FromBody] ArticleRequest article)
         {
             if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
             {
@@ -140,6 +151,18 @@ namespace Shinsekai_API.Controllers
                 _context.Articles.Add(article);
             }
 
+            foreach (var path in article.ImagePaths)
+            {
+                var image = new ImageItem()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Path = path,
+                    ArticleId = article.Id
+                };
+
+                _context.Images.Add(image);
+            }
+
             _context.SaveChanges();
 
             return Ok(new OkResponse()
@@ -168,7 +191,6 @@ namespace Shinsekai_API.Controllers
                 MaxPage = 1
             });
         }
-
 
         [Authorize]
         [HttpPut("update")]
@@ -264,7 +286,5 @@ namespace Shinsekai_API.Controllers
                 Response = "El articulo se elimino con exito"
             });
         }
-
-
     }
 }

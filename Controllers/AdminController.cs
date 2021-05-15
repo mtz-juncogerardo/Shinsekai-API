@@ -42,14 +42,14 @@ namespace Shinsekai_API.Controllers
                 Result = "New Question Published"
             });
         }
-
+        
         [Authorize]
         [HttpPost("location")]
         public IActionResult SaveLocation(LocationItem location)
         {
             if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
             {
-                return Unauthorized(new
+                return Unauthorized(new ErrorResponse()
                 {
                     Error = "You dont have the required role"
                 });

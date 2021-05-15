@@ -14,7 +14,7 @@ namespace Shinsekai_API.MailSender
         {
             ButtonLink = buttonLink;
             ReciverEmail = reciverEmail;
-            Subject = "Welcome to TripPlanner";
+            Subject = "Welcome to Shinsekai Shop";
         }
 
         public override string GetEmailTemplate()
