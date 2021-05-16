@@ -9,5 +9,6 @@ namespace Shinsekai_API.Requests
         [Required] public List<ArticleRequest> Articles { get; set; }
         [Required] public string SuccessUrl { get; set; }
         [Required] public string ErrorUrl { get; set; }
+        public bool PayWithPoints { get; set; }
     }
 }

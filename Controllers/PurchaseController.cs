@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shinsekai_API.Authentication;
 using Shinsekai_API.MailSender;
 using Shinsekai_API.Models;
 using Shinsekai_API.Requests;
@@ -22,10 +24,24 @@ namespace Shinsekai_API.Controllers
             _context = context;
         }
 
+        [Authorize]
         [HttpPost("checkout")]
         public IActionResult ProcessPayment([FromBody] PaymentRequest payment)
         {
-            var paymentService = new PaymentService(payment);
+            PaymentService paymentService;
+            
+            if (payment.PayWithPoints)
+            {
+                var id = AuthService.IdentifyUser(User.Identity);
+                var points = (int)_context.Points.Where(p => p.UserId == id && p.ExpirationDate > DateTime.Now)
+                    .Sum(p => p.Amount);
+
+                paymentService = new PaymentService(payment, points);
+            }
+            else
+            {
+                paymentService = new PaymentService(payment);
+            }
             var options = new SessionCreateOptions
             {
                 PaymentMethodTypes = new List<string>
@@ -50,7 +66,7 @@ namespace Shinsekai_API.Controllers
         {
             if (purchase.BuyerEmail == null && purchase.UserId == null)
             {
-                return BadRequest(new ErrorResponse() 
+                return BadRequest(new ErrorResponse()
                 {
                     Error = "Who is the buyer?"
                 });
@@ -58,7 +74,7 @@ namespace Shinsekai_API.Controllers
 
             if (!purchase.PurchasesArticles.Any())
             {
-                return BadRequest(new ErrorResponse() 
+                return BadRequest(new ErrorResponse()
                 {
                     Error = "The purchase has no articles defined"
                 });
@@ -73,12 +89,12 @@ namespace Shinsekai_API.Controllers
                 var dbArticle = _context.Articles.FirstOrDefault(a => a.Id == articleId);
                 if (dbArticle is not {Stock: > 0})
                 {
-                    return BadRequest(new ErrorResponse() 
+                    return BadRequest(new ErrorResponse()
                     {
                         Error = "Some articles arent in stock anymore or doesnt exist"
                     });
                 }
-                
+
                 var sale = new SaleItem()
                 {
                     Id = Guid.NewGuid().ToString(),

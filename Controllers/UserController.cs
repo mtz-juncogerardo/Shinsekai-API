@@ -34,6 +34,7 @@ namespace Shinsekai_API.Controllers
                     Error = "Something went wrong"
                 });
             }
+            dbUser.Points = _context.Points.Where(p => p.UserId == dbUser.Id && p.ExpirationDate >= DateTime.Now).ToList();
             return Ok(new
             {
                 Result = dbUser
@@ -136,13 +137,13 @@ namespace Shinsekai_API.Controllers
                     paa.PurchaseArticle.PurchaseId,
                     paa.PurchaseArticle.Purchase.Date,
                     paa.PurchaseArticle.Article
-                }).OrderBy(p => p.PurchaseId).ToList()
-                .GroupBy(p => p.PurchaseId);
+                }).OrderBy(p => p.PurchaseId)
+                .GroupBy(p => p.PurchaseId).ToList();
 
             return Ok(new
             {
                 Response = dbPurchases,
-                Count = dbPurchases.Count()
+                Count = dbPurchases.Count
             });
         }
 

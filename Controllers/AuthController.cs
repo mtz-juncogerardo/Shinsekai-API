@@ -6,6 +6,7 @@ using System.Security.Claims;
 using Shinsekai_API.Authentication;
 using Shinsekai_API.MailSender;
 using Shinsekai_API.Models;
+using Shinsekai_API.Responses;
 
 namespace Shinsekai_API.Controllers
 {
@@ -20,12 +21,14 @@ namespace Shinsekai_API.Controllers
             _context = context;
         }
 
-        [HttpGet]
-        public IActionResult Test()
+        [HttpPost ("authorize")]
+        public IActionResult AuthorizeUser(UserItem user)
         {
-            return Ok(new
+            var jwt = new JsonWebTokenAuth(user.Id, user.Email, true);
+
+            return Ok(new OkResponse()
             {
-                Response = "Hello World"
+                 Response = jwt.Token
             });
         }
 
@@ -146,6 +149,13 @@ namespace Shinsekai_API.Controllers
                     Response = dbUser
                 });
             }
+            if (password == string.Empty || salt == string.Empty)
+            {
+                return BadRequest(new ErrorResponse() 
+                {
+                    Error = "Token doesnt include auth params"
+                });
+            }
             var authParams = new AuthParamItem()
             {
                 Id = Guid.NewGuid().ToString(),
@@ -169,7 +179,7 @@ namespace Shinsekai_API.Controllers
 
         [Authorize]
         [HttpPut("security")]
-        public IActionResult Updateuser([FromBody] AuthParams authParams)
+        public IActionResult UpdateUser([FromBody] AuthParams authParams)
         {
             var id = AuthService.IdentifyUser(User.Identity);
             var dbUser = _context.Users.FirstOrDefault(r => r.Id == id);
