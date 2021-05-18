@@ -200,13 +200,16 @@ namespace Shinsekai_API.Controllers
             var dbResponse = dbLocation.Where(l => l.Id == id);
             return Ok(new OkResponse()
             {
-                Response = dbResponse
+                Response = dbResponse,
+                Count = 1,
+                Page = 1,
+                MaxPage = 1
             });
         }
 
         [Authorize]
         [HttpPut("locations/update")]
-        public IActionResult Updatelocation([FromBody] LocationItem location)
+        public IActionResult UpdateLocation([FromBody] LocationItem location)
         {
             if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
             {
@@ -244,8 +247,8 @@ namespace Shinsekai_API.Controllers
         }
         
         [Authorize]
-        [HttpDelete("delete")]
-        public IActionResult Deletelocation([FromQuery] string id)
+        [HttpDelete("locations/delete")]
+        public IActionResult DeleteLocation([FromQuery] string id)
         {
             if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
             {
@@ -259,7 +262,7 @@ namespace Shinsekai_API.Controllers
             {
                 return BadRequest(new ErrorResponse()
                 {
-                    Error = "No se especifico una pregunta para eliminar"
+                    Error = "No se especifico una locacion para eliminar"
                 });
             }
 
@@ -269,7 +272,7 @@ namespace Shinsekai_API.Controllers
             {
                 return BadRequest(new ErrorResponse()
                 {
-                    Error = "El Articulo que intentas eliminar ya no existe"
+                    Error = "La locacion que intentas eliminar ya no existe"
                 });
             }
 
@@ -278,7 +281,7 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "La pregunta se elimino con exito"
+                Response = "La locacion se elimino con exito"
             });
         }
         

@@ -26,25 +26,25 @@ namespace Shinsekai_API.Controllers
         [HttpGet]
         public IActionResult GetArticles([FromQuery] string page,
             string search,
-            string id,
-            bool byAnime,
-            bool byMaterial,
-            bool byLine,
-            bool byBrand,
+            string animeId,
+            string brandId,
+            string lineId,
+            string materialId,
             bool orderBySales)
         {
             var pageNum = page == null ? 1 : int.Parse(page);
             var elementsToSkip = (pageNum - 1) * _numberOfElementsInPage;
             var dbArticles = _context.Articles.ToList();
 
-            if (byBrand)
+            if (brandId != null)
             {
-                dbArticles = _context.Articles.Where(a => a.BrandId == id).ToList();
+                dbArticles = _context.Articles.Where(a => a.BrandId == brandId).ToList();
             }
 
-            if (byAnime)
+            if (animeId != null)
             {
-                dbArticles = _context.AnimesArticles.Join(_context.Animes,
+                dbArticles = _context.AnimesArticles.Where(aa => aa.AnimeId == animeId)
+                    .Join(_context.Animes,
                         aa => aa.AnimeId,
                         a => a.Id,
                         (aa, a) => new
@@ -58,13 +58,13 @@ namespace Shinsekai_API.Controllers
                         {
                             AnimeArticleAnime = aaa,
                             Article = a
-                        }).Where(a => a.AnimeArticleAnime.AnimeArticle.AnimeId == id)
-                    .Select(a => a.Article).ToList();
+                        }).Select(a => a.Article).ToList();
             }
 
-            if (byMaterial)
+            if (materialId != null)
             {
-                dbArticles = _context.MaterialsArticles.Join(_context.Materials,
+                dbArticles = _context.MaterialsArticles.Where(ma => ma.MaterialId == materialId)
+                    .Join(_context.Materials,
                         m => m.MaterialId,
                         a => a.Id,
                         (m, a) => new
@@ -78,13 +78,13 @@ namespace Shinsekai_API.Controllers
                         {
                             MaterialArticle = ma,
                             Article = a
-                        }).Where(a => a.MaterialArticle.MaterialArticle.MaterialId == id)
-                    .Select(a => a.Article).ToList();
+                        }).Select(a => a.Article).ToList();
             }
 
-            if (byLine)
+            if (lineId != null)
             {
-                dbArticles = _context.LinesArticles.Join(_context.Lines,
+                dbArticles = _context.LinesArticles.Where(la => la.LineId == lineId)
+                    .Join(_context.Lines,
                         la => la.LineId,
                         l => l.Id,
                         (la, l) => new
@@ -98,8 +98,7 @@ namespace Shinsekai_API.Controllers
                         {
                             LineArticle = la,
                             Article = a
-                        }).Where(a => a.LineArticle.LineArticle.LineId == id)
-                    .Select(a => a.Article).ToList();
+                        }).Select(a => a.Article).ToList();
             }
 
             if (search != null)
@@ -115,11 +114,12 @@ namespace Shinsekai_API.Controllers
                 dbArticles = dbArticles.Select(a => new
                     {
                         Article = a,
-                        Total = a.Sales.Count
-                    }).OrderByDescending(r => r.Total)
+                        TotalSales = _context.Sales.Count(s => s.ArticleId == a.Id)
+                    }).OrderByDescending(r => r.TotalSales)
                     .Select(a => a.Article).ToList();
             }
-
+            
+            dbArticles.ForEach(a => a.Brand = _context.Brands.FirstOrDefault(b => b.Id == a.BrandId));
             var articleCount = dbArticles.Count;
             var maxPages = (int)Math.Ceiling(articleCount / (decimal)_numberOfElementsInPage);
             var responseArticles = dbArticles.Skip(elementsToSkip).Take(_numberOfElementsInPage);
@@ -153,7 +153,20 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
+            if (article.Images == null || !article.Images.Any())
+            {
+                return BadRequest(new ErrorResponse() 
+                {
+                    Error = "Tu articulo necesita al menos una imagen"
+                });
+            }
+
             article.Id = Guid.NewGuid().ToString();
+            
+            foreach (var image in article.Images)
+            {
+                image.Id = Guid.NewGuid().ToString();
+            }
 
             if (article.OriginalFlag)
             {
@@ -169,17 +182,6 @@ namespace Shinsekai_API.Controllers
                 _context.Articles.Add(article);
             }
 
-            foreach (var path in article.ImagePaths)
-            {
-                var image = new ImageItem()
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Path = path,
-                    ArticleId = article.Id
-                };
-
-                _context.Images.Add(image);
-            }
 
             _context.SaveChanges();
 

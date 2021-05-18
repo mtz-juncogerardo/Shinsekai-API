@@ -18,7 +18,7 @@ namespace Shinsekai_API.Models
         [Required] public bool OriginalFlag { get; set; }
         [MaxLength(36)] public string OriginalSerial { get; set; }
         [MaxLength(200)] public string Details { get; set; }
-        [Required] [DefaultValue("10-09-92")] public DateTime DateAdded { get; set; }
+        [DefaultValue("10-09-92")] public DateTime DateAdded { get; set; }
         [Required] public string BrandId { get; set; }
         public OriginalItem Original { get; set; }
         public BrandItem Brand { get; set; }

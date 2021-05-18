@@ -24,6 +24,13 @@ namespace Shinsekai_API.Controllers
         [HttpPost ("authorize")]
         public IActionResult AuthorizeUser(UserItem user)
         {
+            if (user.Address == null || user.City == null || user.Name == null || user.Phone == null)
+            {
+                return BadRequest(new ErrorResponse() 
+                {
+                    Error = "You must specify an Adress, a City, a Name and a Phone so we can authorize to buy"
+                });
+            }
             var jwt = new JsonWebTokenAuth(user.Id, user.Email, true);
 
             return Ok(new OkResponse()
@@ -131,7 +138,7 @@ namespace Shinsekai_API.Controllers
         public IActionResult RegisterUser()
         {
             var id = AuthService.IdentifyUser(User.Identity);
-            var userClaim = (ClaimsIdentity)User.Identity;
+            var userClaim = (ClaimsIdentity)User.Identity ?? new ClaimsIdentity();
             var email = userClaim.Claims.Where(r => r.Type == ClaimTypes.Email)
                 .Select(c => c.Value)
                 .First();
@@ -190,10 +197,17 @@ namespace Shinsekai_API.Controllers
                     Response = "Token is Corrupted or has expired"
                 });
             }
-            dbUser.AuthParams = _context.AuthParams.FirstOrDefault(r => r.Id == dbUser.AuthParamsId);
+            dbUser.AuthParams = _context.AuthParams.FirstOrDefault(r => r.Id == dbUser.AuthParamsId) ?? new AuthParamItem();
             if (authParams.Password != null)
             {
                 var passwordService = new PasswordService(authParams.Password);
+                if (!passwordService.ValidatePassword())
+                {
+                    return BadRequest(new ErrorResponse() 
+                    {
+                        Error = "Password doesnt met specified parameters"
+                    });
+                }
                 dbUser.AuthParams.Password = passwordService.HashPassword;
                 dbUser.AuthParams.Salt = passwordService.Salt;
             }
