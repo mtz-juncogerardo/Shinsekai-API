@@ -9,7 +9,7 @@ using Shinsekai_API.Responses;
 namespace Shinsekai_API.Controllers
 {
     [ApiController]
-    [Route("tag")]
+    [Route("api/tags")]
     public class TagController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
@@ -21,7 +21,7 @@ namespace Shinsekai_API.Controllers
 
         [Authorize]
         [HttpGet]
-        public IActionResult GetTags([FromQuery] string search, bool byAnime, bool byMaterial, bool byLine)
+        public IActionResult GetTags([FromQuery] string search, bool byAnime, bool byMaterial, bool byLine, bool byBrand)
         {
             if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
             {
@@ -39,6 +39,17 @@ namespace Shinsekai_API.Controllers
                 return Ok(new OkResponse()
                 {
                     Response = dbAnimes
+                });
+            }
+            
+            if (byBrand)
+            {
+                var dbBrands = _context.Brands.Where(b => b.Name.Trim().ToLower()
+                        .Contains(search.Trim().ToLower()))
+                    .ToList();
+                return Ok(new OkResponse()
+                {
+                    Response = dbBrands
                 });
             }
 
@@ -81,14 +92,36 @@ namespace Shinsekai_API.Controllers
                     Error = "You dont have the required role"
                 });
             }
-
+            
             anime.Id = Guid.NewGuid().ToString();
-            _context.Animes.Add(anime);
+            _context.Animes.Add(new AnimeItem() {Id = anime.Id, Name = anime.Name});
             _context.SaveChanges();
 
             return Ok(new OkResponse()
             {
                 Response = "Anime Tag has been saved"
+            });
+        }
+        
+        [Authorize]
+        [HttpPost("brand/create")]
+        public IActionResult SaveBrandTag([FromBody] BrandItem brand)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+            
+            brand.Id = Guid.NewGuid().ToString();
+            _context.Brands.Add(new BrandItem() {Id = brand.Id, Name = brand.Name});
+            _context.SaveChanges();
+
+            return Ok(new OkResponse()
+            {
+                Response = "Brand Tag has been saved"
             });
         }
         
@@ -250,6 +283,45 @@ namespace Shinsekai_API.Controllers
             return Ok(new OkResponse()
             {
                 Response = "La material se elimino con exito"
+            });
+        }
+        
+        [Authorize]
+        [HttpDelete("brand/delete")]
+        public IActionResult DeleteBrandTag([FromQuery] string id)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            if (id == null)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "No se especifico una brand para eliminar"
+                });
+            }
+
+            var dbBrand = _context.Brands.FirstOrDefault(q => q.Id == id);
+
+            if (dbBrand == null)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "El Brand que intentas eliminar ya no existe"
+                });
+            }
+
+            _context.Remove(dbBrand);
+            _context.SaveChanges();
+
+            return Ok(new OkResponse()
+            {
+                Response = "La brand se elimino con exito"
             });
         }
     }

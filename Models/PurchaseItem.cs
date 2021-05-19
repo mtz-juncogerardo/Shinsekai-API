@@ -7,7 +7,7 @@ namespace Shinsekai_API.Models
 {
     public class PurchaseItem
     {
-        [Required] [MaxLength(36)] public string Id { get; set; }
+        [MaxLength(36)] public string Id { get; set; }
         [MaxLength(36)] public string UserId { get; set; }
         public UserItem User { get; set; }
         public int CashPoints { get; set; }

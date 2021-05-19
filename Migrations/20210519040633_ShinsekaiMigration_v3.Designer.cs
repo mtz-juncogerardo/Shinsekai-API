@@ -10,8 +10,8 @@ using Shinsekai_API.Models;
 namespace Shinsekai_API.Migrations
 {
     [DbContext(typeof(ShinsekaiApiContext))]
-    [Migration("20210430035631_ShinsekaiMigration_v2")]
-    partial class ShinsekaiMigration_v2
+    [Migration("20210519040633_ShinsekaiMigration_v3")]
+    partial class ShinsekaiMigration_v3
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -52,17 +52,12 @@ namespace Shinsekai_API.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
-                    b.Property<string>("ArticleItemId")
-                        .HasColumnType("nvarchar(36)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ArticleItemId");
 
                     b.ToTable("Animes");
                 });
@@ -74,7 +69,6 @@ namespace Shinsekai_API.Migrations
                         .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("BrandId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(36)");
 
                     b.Property<DateTime>("DateAdded")
@@ -91,7 +85,6 @@ namespace Shinsekai_API.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -99,8 +92,7 @@ namespace Shinsekai_API.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("OriginalSerial")
-                        .HasMaxLength(36)
-                        .HasColumnType("nvarchar(36)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
@@ -178,8 +170,8 @@ namespace Shinsekai_API.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
-                    b.Property<DateTime>("EstimatedDays")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("EstimatedDays")
+                        .HasColumnType("int");
 
                     b.Property<string>("LocationId")
                         .IsRequired()
@@ -231,7 +223,6 @@ namespace Shinsekai_API.Migrations
                         .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ArticleId")
-                        .IsRequired()
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
@@ -420,9 +411,11 @@ namespace Shinsekai_API.Migrations
                         .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("PurchaseId")
-                        .IsRequired()
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -439,11 +432,16 @@ namespace Shinsekai_API.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
+                    b.Property<int>("CashPoints")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
@@ -563,7 +561,6 @@ namespace Shinsekai_API.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("AuthParamsId")
-                        .IsRequired()
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
@@ -587,7 +584,8 @@ namespace Shinsekai_API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AuthParamsId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[AuthParamsId] IS NOT NULL");
 
                     b.ToTable("Users");
                 });
@@ -595,13 +593,13 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.AnimeArticleItem", b =>
                 {
                     b.HasOne("Shinsekai_API.Models.AnimeItem", "Anime")
-                        .WithMany("ArticlesAnimes")
+                        .WithMany("AnimesArticles")
                         .HasForeignKey("AnimeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
-                        .WithMany()
+                        .WithMany("AnimesArticles")
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -611,20 +609,11 @@ namespace Shinsekai_API.Migrations
                     b.Navigation("Article");
                 });
 
-            modelBuilder.Entity("Shinsekai_API.Models.AnimeItem", b =>
-                {
-                    b.HasOne("Shinsekai_API.Models.ArticleItem", null)
-                        .WithMany("Animes")
-                        .HasForeignKey("ArticleItemId");
-                });
-
             modelBuilder.Entity("Shinsekai_API.Models.ArticleItem", b =>
                 {
                     b.HasOne("Shinsekai_API.Models.BrandItem", "Brand")
                         .WithMany("Articles")
-                        .HasForeignKey("BrandId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BrandId");
 
                     b.Navigation("Brand");
                 });
@@ -663,9 +652,7 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
                         .WithMany("Images")
-                        .HasForeignKey("ArticleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ArticleId");
 
                     b.Navigation("Article");
                 });
@@ -673,7 +660,7 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.LineArticleItem", b =>
                 {
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
-                        .WithMany()
+                        .WithMany("LinesArticles")
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -740,9 +727,7 @@ namespace Shinsekai_API.Migrations
 
                     b.HasOne("Shinsekai_API.Models.PurchaseItem", "Purchase")
                         .WithMany("PurchasesArticles")
-                        .HasForeignKey("PurchaseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PurchaseId");
 
                     b.Navigation("Article");
 
@@ -753,9 +738,7 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.UserItem", "User")
                         .WithMany("Purchases")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
@@ -805,25 +788,25 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.AuthParamItem", "AuthParams")
                         .WithOne("User")
-                        .HasForeignKey("Shinsekai_API.Models.UserItem", "AuthParamsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Shinsekai_API.Models.UserItem", "AuthParamsId");
 
                     b.Navigation("AuthParams");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.AnimeItem", b =>
                 {
-                    b.Navigation("ArticlesAnimes");
+                    b.Navigation("AnimesArticles");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.ArticleItem", b =>
                 {
-                    b.Navigation("Animes");
+                    b.Navigation("AnimesArticles");
 
                     b.Navigation("Favorites");
 
                     b.Navigation("Images");
+
+                    b.Navigation("LinesArticles");
 
                     b.Navigation("MaterialsArticles");
 

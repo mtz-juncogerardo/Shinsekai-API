@@ -118,11 +118,16 @@ namespace Shinsekai_API.Controllers
                     }).OrderByDescending(r => r.TotalSales)
                     .Select(a => a.Article).ToList();
             }
-            
+            else
+            {
+                dbArticles = dbArticles.OrderByDescending(a => a.DateAdded).ToList();
+            }
+
             dbArticles.ForEach(a => a.Brand = _context.Brands.FirstOrDefault(b => b.Id == a.BrandId));
             var articleCount = dbArticles.Count;
             var maxPages = (int)Math.Ceiling(articleCount / (decimal)_numberOfElementsInPage);
-            var responseArticles = dbArticles.Skip(elementsToSkip).Take(_numberOfElementsInPage);
+            var articlesByPage = dbArticles.Skip(elementsToSkip).Take(_numberOfElementsInPage);
+            var responseArticles = articlesByPage.Select(article => new ArticleResponse(article, _context));
 
             return Ok(new OkResponse()
             {
@@ -155,18 +160,15 @@ namespace Shinsekai_API.Controllers
 
             if (article.Images == null || !article.Images.Any())
             {
-                return BadRequest(new ErrorResponse() 
+                return BadRequest(new ErrorResponse()
                 {
                     Error = "Tu articulo necesita al menos una imagen"
                 });
             }
 
             article.Id = Guid.NewGuid().ToString();
-            
-            foreach (var image in article.Images)
-            {
-                image.Id = Guid.NewGuid().ToString();
-            }
+            article.DateAdded = DateTime.Now;
+            article.Images.ForEach(i => i.Id = Guid.NewGuid().ToString());
 
             if (article.OriginalFlag)
             {
@@ -176,12 +178,12 @@ namespace Shinsekai_API.Controllers
                     Article = article
                 };
                 _context.Originals.Add(original);
+                article.OriginalSerial = null;
             }
             else
             {
                 _context.Articles.Add(article);
             }
-
 
             _context.SaveChanges();
 
@@ -203,9 +205,11 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
+            var articleResponse = new ArticleResponse(dbArticle, _context);
+
             return Ok(new OkResponse()
             {
-                Response = dbArticle,
+                Response = articleResponse,
                 Count = 1,
                 Page = 1,
                 MaxPage = 1
@@ -214,7 +218,7 @@ namespace Shinsekai_API.Controllers
 
         [Authorize]
         [HttpPut("update")]
-        public IActionResult UpdateItem([FromBody] ArticleItem article)
+        public IActionResult UpdateItem([FromBody] ArticleRequest article)
         {
             if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
             {
@@ -232,9 +236,9 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            var entityExistsFlag = _context.Articles.Any(a => a.Id == article.Id);
+            var dbArticle = _context.Articles.FirstOrDefault(a => a.Id == article.Id);
 
-            if (!entityExistsFlag)
+            if (dbArticle == null)
             {
                 return BadRequest(new ErrorResponse()
                 {
@@ -242,25 +246,7 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            if (article.OriginalFlag)
-            {
-                var original = new OriginalItem()
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    ArticleId = article.Id
-                };
-                article.OriginalSerial = null;
-                _context.Add(original);
-            }
-
-            if (!article.OriginalFlag)
-            {
-                var original = _context.Originals.Where(o => o.ArticleId == article.Id);
-                _context.Remove(original);
-            }
-
-            _context.Update(article);
-            _context.SaveChanges();
+            article.UpdateContext(_context);
 
             return Ok(new OkResponse()
             {
@@ -298,6 +284,13 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
+            var dbImages = _context.Images.Where(i => i.ArticleId == dbArticle.Id);
+
+            foreach (var image in dbImages)
+            {
+                _context.Remove(image);
+            }
+            
             _context.Remove(dbArticle);
             _context.SaveChanges();
 

@@ -8,6 +8,18 @@ namespace Shinsekai_API.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Animes",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Animes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AuthParams",
                 columns: table => new
                 {
@@ -82,19 +94,6 @@ namespace Shinsekai_API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OriginalsReplicas",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
-                    OriginalArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
-                    ReplicaArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OriginalsReplicas", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Promotions",
                 columns: table => new
                 {
@@ -131,7 +130,7 @@ namespace Shinsekai_API.Migrations
                     Phone = table.Column<string>(type: "nvarchar(12)", maxLength: 12, nullable: true),
                     Address = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
                     City = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    AuthParamsId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
+                    AuthParamsId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -141,27 +140,7 @@ namespace Shinsekai_API.Migrations
                         column: x => x.AuthParamsId,
                         principalTable: "AuthParams",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Deliveries",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
-                    Parcel = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    EstimatedDays = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LocationId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Deliveries", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Deliveries_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -175,10 +154,9 @@ namespace Shinsekai_API.Migrations
                     DiscountPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Stock = table.Column<int>(type: "int", nullable: false),
                     OriginalFlag = table.Column<bool>(type: "bit", nullable: false),
-                    OriginalReplicaId = table.Column<string>(type: "nvarchar(36)", nullable: false),
                     Details = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     DateAdded = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    BrandId = table.Column<string>(type: "nvarchar(36)", nullable: false)
+                    BrandId = table.Column<string>(type: "nvarchar(36)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -188,11 +166,25 @@ namespace Shinsekai_API.Migrations
                         column: x => x.BrandId,
                         principalTable: "Brands",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Deliveries",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    Parcel = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    EstimatedDays = table.Column<int>(type: "int", nullable: false),
+                    LocationId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Deliveries", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Articles_OriginalsReplicas_OriginalReplicaId",
-                        column: x => x.OriginalReplicaId,
-                        principalTable: "OriginalsReplicas",
+                        name: "FK_Deliveries_Locations_LocationId",
+                        column: x => x.LocationId,
+                        principalTable: "Locations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -222,7 +214,9 @@ namespace Shinsekai_API.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: true),
+                    CashPoints = table.Column<int>(type: "int", nullable: false),
+                    Total = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -233,26 +227,32 @@ namespace Shinsekai_API.Migrations
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Animes",
+                name: "AnimesArticles",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    ArticleItemId = table.Column<string>(type: "nvarchar(36)", nullable: true)
+                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    AnimeId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Animes", x => x.Id);
+                    table.PrimaryKey("PK_AnimesArticles", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Animes_Articles_ArticleItemId",
-                        column: x => x.ArticleItemId,
+                        name: "FK_AnimesArticles_Animes_AnimeId",
+                        column: x => x.AnimeId,
+                        principalTable: "Animes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AnimesArticles_Articles_ArticleId",
+                        column: x => x.ArticleId,
                         principalTable: "Articles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -286,7 +286,7 @@ namespace Shinsekai_API.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
                     Path = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
+                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -296,7 +296,7 @@ namespace Shinsekai_API.Migrations
                         column: x => x.ArticleId,
                         principalTable: "Articles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -345,6 +345,24 @@ namespace Shinsekai_API.Migrations
                         name: "FK_MaterialsArticles_Materials_MaterialId",
                         column: x => x.MaterialId,
                         principalTable: "Materials",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Originals",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
+                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Originals", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Originals_Articles_ArticleId",
+                        column: x => x.ArticleId,
+                        principalTable: "Articles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -399,7 +417,8 @@ namespace Shinsekai_API.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
                     ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
-                    PurchaseId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
+                    PurchaseId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: true),
+                    Quantity = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -415,7 +434,7 @@ namespace Shinsekai_API.Migrations
                         column: x => x.PurchaseId,
                         principalTable: "Purchases",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -438,36 +457,6 @@ namespace Shinsekai_API.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "AnimesArticles",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
-                    ArticleId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false),
-                    AnimeId = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AnimesArticles", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AnimesArticles_Animes_AnimeId",
-                        column: x => x.AnimeId,
-                        principalTable: "Animes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AnimesArticles_Articles_ArticleId",
-                        column: x => x.ArticleId,
-                        principalTable: "Articles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Animes_ArticleItemId",
-                table: "Animes",
-                column: "ArticleItemId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_AnimesArticles_AnimeId",
                 table: "AnimesArticles",
@@ -484,16 +473,10 @@ namespace Shinsekai_API.Migrations
                 column: "BrandId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Articles_OriginalReplicaId",
-                table: "Articles",
-                column: "OriginalReplicaId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Deliveries_LocationId",
                 table: "Deliveries",
                 column: "LocationId",
-                unique: false);
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Favorites_ArticleId",
@@ -529,6 +512,12 @@ namespace Shinsekai_API.Migrations
                 name: "IX_MaterialsArticles_MaterialId",
                 table: "MaterialsArticles",
                 column: "MaterialId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Originals_ArticleId",
+                table: "Originals",
+                column: "ArticleId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Points_UserId",
@@ -574,7 +563,8 @@ namespace Shinsekai_API.Migrations
                 name: "IX_Users_AuthParamsId",
                 table: "Users",
                 column: "AuthParamsId",
-                unique: true);
+                unique: true,
+                filter: "[AuthParamsId] IS NOT NULL");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -599,6 +589,9 @@ namespace Shinsekai_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "MaterialsArticles");
+
+            migrationBuilder.DropTable(
+                name: "Originals");
 
             migrationBuilder.DropTable(
                 name: "Points");
@@ -644,9 +637,6 @@ namespace Shinsekai_API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Brands");
-
-            migrationBuilder.DropTable(
-                name: "OriginalsReplicas");
 
             migrationBuilder.DropTable(
                 name: "AuthParams");
