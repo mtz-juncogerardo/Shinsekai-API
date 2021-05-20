@@ -24,6 +24,9 @@ namespace Shinsekai_API
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton(Configuration);
+            var configuration = new ApiConfiguration(Configuration);
+            
             services.AddCors(c =>
             {
                 c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
@@ -40,7 +43,7 @@ namespace Shinsekai_API
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ApiConfiguration.JwtSecretKey)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.JwtSecretKey)),
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
@@ -48,7 +51,7 @@ namespace Shinsekai_API
                     ValidAudience = "https://localhost:5001"
                 };
             });
-            services.AddDbContext<ShinsekaiApiContext>(options => options.UseSqlServer(ApiConfiguration.ConnectionString));
+            services.AddDbContext<ShinsekaiApiContext>(options => options.UseSqlServer(configuration.ConnectionString));
             services.AddControllers();
             services.AddMvc()
                 .AddNewtonsoftJson(

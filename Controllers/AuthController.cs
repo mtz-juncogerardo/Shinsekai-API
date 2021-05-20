@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
 using Shinsekai_API.Authentication;
 using Shinsekai_API.MailSender;
 using Shinsekai_API.Models;
@@ -15,10 +16,12 @@ namespace Shinsekai_API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(ShinsekaiApiContext context)
+        public AuthController(ShinsekaiApiContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         [HttpPost ("authorize")]
@@ -31,7 +34,7 @@ namespace Shinsekai_API.Controllers
                     Error = "You must specify an Adress, a City, a Name and a Phone so we can authorize to buy"
                 });
             }
-            var jwt = new JsonWebTokenAuth(user.Id, user.Email, true);
+            var jwt = new JsonWebTokenAuth(user.Id, user.Email, _configuration,true);
 
             return Ok(new OkResponse()
             {
@@ -60,7 +63,7 @@ namespace Shinsekai_API.Controllers
             }
             dbUser.AuthParams = _context.AuthParams.FirstOrDefault(r => r.Id == dbUser.AuthParamsId);
             var auth = new AuthService(authParams.Email, authParams.Password);
-            var token = auth.AuthByEmailAndPassword(dbUser);
+            var token = auth.AuthByEmailAndPassword(dbUser, _configuration);
             if (token == null)
             {
                 return Unauthorized(new
@@ -86,8 +89,8 @@ namespace Shinsekai_API.Controllers
                     Error = "Email does not match any known records"
                 });
             }
-            var jwt = new JsonWebTokenAuth(dbUser.Id, dbUser.Email, true);
-            var recoverCredentials = new RecoverCredentialsMail(dbUser.Email, jwt.Token);
+            var jwt = new JsonWebTokenAuth(dbUser.Id, dbUser.Email, _configuration, true);
+            var recoverCredentials = new RecoverCredentialsMail(dbUser.Email, jwt.Token, _configuration);
             recoverCredentials.SendEmail();
             return Ok(new
             {
@@ -121,10 +124,9 @@ namespace Shinsekai_API.Controllers
             };
             var jwt = new JsonWebTokenAuth(dbUser.Id,
                                            dbUser.Email,
-                                           passwordService.HashPassword,
-                                           passwordService.Salt);
+                                           passwordService.Salt, passwordService.HashPassword, _configuration);
             var link = $"http://localhost:4200/register?token={jwt.Token}";
-            var emailValidation = new EmailValidationMail(dbUser.Email, link);
+            var emailValidation = new EmailValidationMail(dbUser.Email, link, _configuration);
             emailValidation.SendEmail();
 
             return Ok(new

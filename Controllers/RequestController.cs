@@ -1,6 +1,7 @@
 using System.Linq;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Shinsekai_API.MailSender;
 using Shinsekai_API.Models;
 using Shinsekai_API.Requests;
@@ -13,10 +14,12 @@ namespace Shinsekai_API.Controllers
     public class RequestController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
-        
-        public RequestController(ShinsekaiApiContext context)
+        private readonly IConfiguration _configuration;
+
+        public RequestController(ShinsekaiApiContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         [HttpPost]
@@ -32,7 +35,7 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            var contactEmail = new UserRequestMail(req.Email, req.Name, req.PurchaseId, req.Message);
+            var contactEmail = new UserRequestMail(req.Email, req.Name, req.PurchaseId, req.Message, _configuration);
             contactEmail.SendEmail();
             
             return Ok(new OkResponse()

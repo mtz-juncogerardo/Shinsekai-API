@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Shinsekai_API.Config;
 
@@ -17,28 +18,29 @@ namespace Shinsekai_API.Authentication
         private readonly string _salt;
         private readonly bool _smallExpiration;
 
-        public JsonWebTokenAuth(string tokenId, string email, bool smallExpiration = false)
+        public JsonWebTokenAuth(string tokenId, string email, IConfiguration configuration, bool smallExpiration = false)
         {
             _tokenId = tokenId;
             _email = email;
             _smallExpiration = smallExpiration;
             _password = string.Empty;
             _salt = string.Empty;
-            Token = GenerateJwtToken();
+            Token = GenerateJwtToken(configuration);
         }
 
-        public JsonWebTokenAuth(string tokenId, string email, string password, string salt)
+        public JsonWebTokenAuth(string tokenId, string email, string password, string salt, IConfiguration configuration)
         {
             _tokenId = tokenId;
             _email = email;
             _password = password;
             _salt = salt;
             _smallExpiration = false;
-            Token = GenerateJwtToken();
+            Token = GenerateJwtToken(configuration);
         }
-        private string GenerateJwtToken()
+        private string GenerateJwtToken(IConfiguration config)
         {
-            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ApiConfiguration.JwtSecretKey));
+            var configuration = new ApiConfiguration(config);
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.JwtSecretKey));
             var loginCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha512);
             var tokenOptions = new JwtSecurityToken(
                 "https://localhost:5001",

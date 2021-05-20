@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace Shinsekai_API.MailSender
 {
@@ -9,8 +10,8 @@ namespace Shinsekai_API.MailSender
     {
         private const string Subject = "Shinsekai restablece tu contraseña";
         private readonly string _buttonLink;
-        public RecoverCredentialsMail(string receiverEmail, string buttonLink)
-        : base(Subject, receiverEmail)
+        public RecoverCredentialsMail(string receiverEmail, string buttonLink, IConfiguration configuration)
+        : base(Subject, receiverEmail, configuration)
         {
             _buttonLink = buttonLink;
         }

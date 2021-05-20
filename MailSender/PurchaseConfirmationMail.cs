@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Configuration;
+
 namespace Shinsekai_API.MailSender
 {
     public class PurchaseConfirmationMail : MailService
@@ -5,7 +7,8 @@ namespace Shinsekai_API.MailSender
         private readonly string _purchaseId;
         private const string Subject = "Shinsekai - Thank you for your purchase";
 
-        public PurchaseConfirmationMail(string receiverEmail, string purchaseId) : base(Subject, receiverEmail)
+        public PurchaseConfirmationMail(string receiverEmail, string purchaseId, IConfiguration configuration) 
+            : base(Subject, receiverEmail, configuration)
         {
             _purchaseId = purchaseId;
         }

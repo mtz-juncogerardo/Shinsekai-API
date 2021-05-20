@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Configuration;
+
 namespace Shinsekai_API.MailSender
 {
     public class UserRequestMail : MailService
@@ -7,8 +9,8 @@ namespace Shinsekai_API.MailSender
         private readonly string _purchaseId;
         private readonly string _details;
 
-        public UserRequestMail(string receiverEmail, string userName, string purchaseId, string details) 
-            : base(Subject, receiverEmail)
+        public UserRequestMail(string receiverEmail, string userName, string purchaseId, string details, IConfiguration configuration) 
+            : base(Subject, receiverEmail, configuration)
         {
             _userName = userName;
             _purchaseId = purchaseId;

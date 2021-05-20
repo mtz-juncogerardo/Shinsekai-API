@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Shinsekai_API.Authentication;
 using Shinsekai_API.MailSender;
 using Shinsekai_API.Models;
@@ -19,10 +20,12 @@ namespace Shinsekai_API.Controllers
     public class PurchaseController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
+        private readonly IConfiguration _configuration;
 
-        public PurchaseController(ShinsekaiApiContext context)
+        public PurchaseController(ShinsekaiApiContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         [Authorize]
@@ -187,7 +190,7 @@ namespace Shinsekai_API.Controllers
             _context.Points.Add(pointItem);
             _context.SaveChanges();
 
-            var emailService = new PurchaseConfirmationMail(buyer.Email, purchase.Id);
+            var emailService = new PurchaseConfirmationMail(buyer.Email, purchase.Id, _configuration);
             emailService.SendEmail();
 
             return Ok(new OkResponse()

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace Shinsekai_API.MailSender
 {
@@ -12,8 +13,8 @@ namespace Shinsekai_API.MailSender
         private const string Subject = "Welcome to Shinsekai Shop";
 
         private readonly string _buttonLink;
-        public EmailValidationMail(string receiverEmail, string buttonLink)
-        : base(Subject, receiverEmail)
+        public EmailValidationMail(string receiverEmail, string buttonLink, IConfiguration configuration)
+        : base(Subject, receiverEmail, configuration)
         {
             _buttonLink = buttonLink;
         }

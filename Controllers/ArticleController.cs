@@ -150,11 +150,14 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            if (article.BrandId == null)
+            if (article.Details == null ||
+                article.BrandId == null ||
+                article.Price == 0 ||
+                article.Height == 0)
             {
                 return BadRequest(new ErrorResponse()
                 {
-                    Error = "Necesitas especificar una marca"
+                    Error = "Necesitas especificar una marca, un precio, unos detalles y una altura"
                 });
             }
 

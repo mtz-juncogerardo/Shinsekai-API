@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
+using Microsoft.Extensions.Configuration;
+using Shinsekai_API.Config;
 using Shinsekai_API.Models;
 
 namespace Shinsekai_API.Authentication
@@ -18,9 +20,9 @@ namespace Shinsekai_API.Authentication
             Password = password;
         }
 
-        public string AuthByEmailAndPassword(UserItem user) 
+        public string AuthByEmailAndPassword(UserItem user, IConfiguration configuration) 
         {
-            var jwt = new JsonWebTokenAuth(user.Id, user.Email);
+            var jwt = new JsonWebTokenAuth(user.Id, user.Email, configuration);
             var passwordService = new PasswordService(Password, user.AuthParams.Salt);
 
             return passwordService.HashPassword != user.AuthParams.Password ? null : jwt.Token;

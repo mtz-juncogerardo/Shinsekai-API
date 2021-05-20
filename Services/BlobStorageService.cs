@@ -1,5 +1,6 @@
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
+using Microsoft.Extensions.Configuration;
 using Shinsekai_API.Config;
 
 namespace Shinsekai_API.Services
@@ -9,10 +10,11 @@ namespace Shinsekai_API.Services
         private CloudStorageAccount _storageAccount;
         private CloudBlobClient _blobClient;
         private CloudBlobContainer _blobContainer;
+        private ApiConfiguration _configuration;
 
-        public BlobStorageService(string containerName)
+        public BlobStorageService(string containerName, IConfiguration configuration)
         {
-            _storageAccount = CloudStorageAccount.Parse(ApiConfiguration.SvrConnectionString);
+            _storageAccount = CloudStorageAccount.Parse(new ApiConfiguration(configuration).SvrConnectionString);
             _blobClient = _storageAccount.CreateCloudBlobClient();
             _blobContainer = _blobClient.GetContainerReference(containerName);
         }

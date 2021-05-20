@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Mail;
+using Microsoft.Extensions.Configuration;
 using Shinsekai_API.Config;
 
 namespace Shinsekai_API.MailSender
@@ -9,16 +10,18 @@ namespace Shinsekai_API.MailSender
     {
         private readonly string _receiverEmail;
         private readonly string _subject;
+        private readonly ApiConfiguration _configuration;
 
-        protected MailService(string subject, string receiverEmail)
+        protected MailService(string subject, string receiverEmail, IConfiguration configuration)
         {
             _subject = subject;
             _receiverEmail = receiverEmail;
+            _configuration = new ApiConfiguration(configuration);
         }
 
         public void SendEmail()
         {
-            var message = new MailMessage(ApiConfiguration.MailServiceEmail, _receiverEmail)
+            var message = new MailMessage(_configuration.MailServiceEmail, _receiverEmail)
             {
                 Subject = _subject,
                 Body = GetEmailTemplate(),
@@ -26,7 +29,7 @@ namespace Shinsekai_API.MailSender
             };
             var client = new SmtpClient("smtp-mail.outlook.com")
             {
-                Credentials = new NetworkCredential(ApiConfiguration.MailServiceEmail, ApiConfiguration.MailServicePassword),
+                Credentials = new NetworkCredential(_configuration.MailServiceEmail, _configuration.MailServicePassword),
                 Port = 587,
                 EnableSsl = true
             };
