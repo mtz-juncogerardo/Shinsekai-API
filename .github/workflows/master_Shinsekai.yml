@@ -24,7 +24,7 @@ jobs:
     - name: Replace env secrets
       uses: microsoft/variable-substitution@v1 
       with:
-        files: 'employee.json'
+        files: 'appsettings.json'
       env:
         DbConnectionString: ${{secrets.DB_CONNECTION_STRING}}
         StripeKey: ${{secrets.DB_STRIPE_KEY}}
