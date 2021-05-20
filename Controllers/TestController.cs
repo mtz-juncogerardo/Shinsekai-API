@@ -7,7 +7,7 @@ namespace Shinsekai_API.Controllers
     public class Test : ControllerBase
     {
 
-        [HttpGet]
+        [HttpGet("/")]
         public IActionResult Nothing()
         {
             return Ok(new OkResponse() 
