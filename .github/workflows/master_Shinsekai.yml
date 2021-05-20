@@ -15,11 +15,22 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
+    
     - name: Set up .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '5.0.x'
+    
+    - name: Replace env secrets
+      uses: microsoft/variable-substitution@v1 
+      with:
+        files: 'employee.json'
+      env:
+        DbConnectionString: ${{secrets.DB_CONNECTION_STRING}}
+        StripeKey: ${{secrets.DB_STRIPE_KEY}}
+        JwtKey: ${{secrets.JWT_KEY}}
+        SenderEmail: ${{secrets.SENDER_EMAIL}}
+        MailPassword: ${{secrets.MAIL_PASSWORD}}
 
     - name: Build with dotnet
       run: dotnet build --configuration Release
