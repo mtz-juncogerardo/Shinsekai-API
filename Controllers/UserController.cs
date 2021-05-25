@@ -35,9 +35,9 @@ namespace Shinsekai_API.Controllers
                 });
             }
             dbUser.Points = _context.Points.Where(p => p.UserId == dbUser.Id && p.ExpirationDate >= DateTime.Now).ToList();
-            return Ok(new
+            return Ok(new OkResponse()
             {
-                Result = dbUser
+                Response = dbUser
             });
         }
 

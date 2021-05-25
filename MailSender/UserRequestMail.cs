@@ -8,17 +8,19 @@ namespace Shinsekai_API.MailSender
         private readonly string _userName;
         private readonly string _purchaseId;
         private readonly string _details;
+        private readonly string _userEmail;
 
-        public UserRequestMail(string receiverEmail, string userName, string purchaseId, string details, IConfiguration configuration) 
+        public UserRequestMail(string receiverEmail, string userName, string purchaseId, string details, string userEmail, IConfiguration configuration) 
             : base(Subject, receiverEmail, configuration)
         {
             _userName = userName;
+            _userEmail = userEmail;
             _purchaseId = purchaseId;
             _details = details;
         }
         protected override string GetEmailTemplate()
         {
-            return $"El usuario {_userName} con el Id de compra {_purchaseId} tiene el siguiente comentario: {_details}";
+            return $"<p>El usuario: <strong>{_userName}</strong><br> registrado con el mail: <strong>{_userEmail}</strong><br> con el Id de compra: <strong>{_purchaseId}</strong> tiene el siguiente comentario: </p> <h4>{_details}</h4>";
         }
     }
 }

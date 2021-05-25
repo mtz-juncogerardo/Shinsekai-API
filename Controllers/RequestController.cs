@@ -35,7 +35,7 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            var contactEmail = new UserRequestMail(req.Email, req.Name, req.PurchaseId, req.Message, _configuration);
+            var contactEmail = new UserRequestMail(req.Email, req.Name, req.PurchaseId, req.Message, req.Email, _configuration);
             contactEmail.SendEmail();
             
             return Ok(new OkResponse()

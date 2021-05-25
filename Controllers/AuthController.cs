@@ -24,21 +24,21 @@ namespace Shinsekai_API.Controllers
             _configuration = configuration;
         }
 
-        [HttpPost ("authorize")]
+        [HttpPost("authorize")]
         public IActionResult AuthorizeUser(UserItem user)
         {
             if (user.Address == null || user.City == null || user.Name == null || user.Phone == null)
             {
-                return BadRequest(new ErrorResponse() 
+                return BadRequest(new ErrorResponse()
                 {
                     Error = "You must specify an Adress, a City, a Name and a Phone so we can authorize to buy"
                 });
             }
-            var jwt = new JsonWebTokenAuth(user.Id, user.Email, _configuration,true);
+            var jwt = new JsonWebTokenAuth(user.Id, user.Email, _configuration, true);
 
             return Ok(new OkResponse()
             {
-                 Response = jwt.Token
+                Response = jwt.Token
             });
         }
 
@@ -56,9 +56,9 @@ namespace Shinsekai_API.Controllers
             var dbUser = _context.Users.FirstOrDefault(r => r.Email == authParams.Email);
             if (dbUser == null)
             {
-                return Unauthorized(new
+                return Unauthorized(new ErrorResponse()
                 {
-                    Error = "Account is not active or password has changed"
+                    Error = "La cuenta no esta activa o la contraseña ha cambiado"
                 });
             }
             dbUser.AuthParams = _context.AuthParams.FirstOrDefault(r => r.Id == dbUser.AuthParamsId);
@@ -71,10 +71,9 @@ namespace Shinsekai_API.Controllers
                     Error = "Account is not active or password has changed"
                 });
             }
-            return Ok(new
+            return Ok(new OkResponse()
             {
-                Response = "Logged correctly",
-                Token = token
+                Response = token
             });
         }
 
@@ -123,8 +122,8 @@ namespace Shinsekai_API.Controllers
                 Email = authParams.Email
             };
             var jwt = new JsonWebTokenAuth(dbUser.Id,
-                                           dbUser.Email,
-                                           passwordService.Salt, passwordService.HashPassword, _configuration);
+                dbUser.Email,
+                passwordService.HashPassword, passwordService.Salt, _configuration);
             var link = $"http://localhost:4200/register?token={jwt.Token}";
             var emailValidation = new EmailValidationMail(dbUser.Email, link, _configuration);
             emailValidation.SendEmail();
@@ -153,14 +152,15 @@ namespace Shinsekai_API.Controllers
             var dbUser = _context.Users.FirstOrDefault(r => r.Email == email);
             if (dbUser != null)
             {
+                var auth = new JsonWebTokenAuth(dbUser.Id, dbUser.Email, _configuration);
                 return Ok(new
                 {
-                    Response = dbUser
+                    Response = auth.Token
                 });
             }
             if (password == string.Empty || salt == string.Empty)
             {
-                return BadRequest(new ErrorResponse() 
+                return BadRequest(new ErrorResponse()
                 {
                     Error = "Token doesnt include auth params"
                 });
@@ -180,9 +180,11 @@ namespace Shinsekai_API.Controllers
             _context.Users.Add(dbUser);
             _context.SaveChanges();
 
+            var jwt = new JsonWebTokenAuth(dbUser.Id, dbUser.Email, _configuration);
+
             return Ok(new
             {
-                Response = "User created correctly"
+                Response = jwt.Token
             });
         }
 
@@ -205,7 +207,7 @@ namespace Shinsekai_API.Controllers
                 var passwordService = new PasswordService(authParams.Password);
                 if (!passwordService.ValidatePassword())
                 {
-                    return BadRequest(new ErrorResponse() 
+                    return BadRequest(new ErrorResponse()
                     {
                         Error = "Password doesnt met specified parameters"
                     });

@@ -29,7 +29,7 @@ namespace Shinsekai_API.Authentication
         public bool ValidatePassword()
         {
             return _plainPassword != null &&
-                   _plainPassword.Length > 8 &&
+                   _plainPassword.Length >= 8 &&
                    _plainPassword.Any(char.IsUpper) &&
                    _plainPassword.Any(char.IsNumber) &&
                    _plainPassword.Any(char.IsPunctuation);
