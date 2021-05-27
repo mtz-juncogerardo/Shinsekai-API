@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Extensions.Configuration;
@@ -28,15 +30,27 @@ namespace Shinsekai_API.Services
             });
         }
 
-        public string UploadFileToStorage(string fileName, string path)
+        public async Task<string> UploadFileToStorage(IFormFile myFile, string fileName)
         {
             var myBlob = _blobContainer.GetBlockBlobReference(fileName);
-            using (var fileStream = System.IO.File.OpenRead(path))
+            var totalSize = myFile.Length;
+            var fileBytes = new byte[myFile.Length];
+
+            using (var fileStream = myFile.OpenReadStream())
             {
-                myBlob.UploadFromStreamAsync(fileStream);
+                var offset = 0;
+
+                while (offset < myFile.Length)
+                {
+                    var chunkSize = totalSize - offset < 8192 ? (int) totalSize - offset : 8192;
+
+                    offset += await fileStream.ReadAsync(fileBytes, offset, chunkSize);
+                }
+                
+                myBlob.UploadFromStream(fileStream);
             }
 
-            return path;
+            return fileName;
         }
     }
 }
