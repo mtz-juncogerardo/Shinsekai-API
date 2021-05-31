@@ -24,6 +24,25 @@ namespace Shinsekai_API.Controllers
             _configuration = configuration;
         }
 
+        [Authorize]
+        [HttpGet("admin")]
+        public IActionResult GetAuthorization()
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            return Ok(new OkResponse() 
+            {
+                Response = "Authorized"
+            });
+        }
+
+
         [HttpPost("authorize")]
         public IActionResult AuthorizeUser(UserItem user)
         {
@@ -113,7 +132,7 @@ namespace Shinsekai_API.Controllers
             {
                 return BadRequest(new
                 {
-                    Error = "Email already exists"
+                    Error = "El email ya se encuentra registrado, intenta iniciar sesión"
                 });
             }
             dbUser = new UserItem()
