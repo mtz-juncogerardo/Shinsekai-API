@@ -4,12 +4,21 @@ namespace Shinsekai_API.Config
 {
     public class ApiConfiguration
     {
+        public IConfiguration Configuration { get; set; }
+
+        public string ConnectionString { get; set; }
+        public string JwtSecretKey { get; set; }
+        public string BlobStorageConnectionString { get; set; }
+        public string StripeKey { get; set; }
+        public string MailServiceEmail { get; set; }
+
+        public string MailServicePassword { get; set; }
         public ApiConfiguration(IConfiguration configuration)
         {
             Configuration = configuration;
             MapValues();
         }
-        
+
         private void MapValues()
         {
             ConnectionString = Configuration["DbConnectionString"];
@@ -17,16 +26,7 @@ namespace Shinsekai_API.Config
             StripeKey = Configuration["StripeKey"];
             MailServiceEmail = Configuration["SenderEmail"];
             MailServicePassword = Configuration["MailPassword"];
+            BlobStorageConnectionString = Configuration["StorageConnectionString"];
         }
-
-        public IConfiguration Configuration { get; set; }
-
-        public string ConnectionString { get; set; }
-        public string JwtSecretKey { get; set; }
-        public string SvrConnectionString { get; set; }
-        public string StripeKey { get; set; }
-        public string MailServiceEmail { get; set; }
-
-        public string MailServicePassword { get; set; }
     }
 }

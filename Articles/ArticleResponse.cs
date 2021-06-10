@@ -38,12 +38,25 @@ namespace Shinsekai_API.Responses
             Name = article.Name;
             Details = article.Details;
             Height = article.Height;
-            OriginalSerial = context.Originals.FirstOrDefault(o => o.ArticleId == article.Id)?.Id;
+            OriginalSerial = context.Originals.FirstOrDefault(o => o.ArticleId == article.OriginalSerial)?.ArticleId;
             Price = article.Price;
             Stock = article.Stock;
             DateAdded = article.DateAdded;
             DiscountPrice = article.DiscountPrice;
             OriginalFlag = article.OriginalFlag;
+        }
+
+        public ArticleResponse(ArticleItem article)
+        {
+            Id = article.Id;
+            Name = article.Name;
+            Details = article.Details;
+            Height = article.Height;
+            Price = article.Price;
+            Stock = article.Stock;
+            DateAdded = article.DateAdded;
+            DiscountPrice = article.DiscountPrice;
+            OriginalFlag = article.OriginalFlag; 
         }
 
         private static IEnumerable<Tag> GetAnimes(ShinsekaiApiContext context, string articleId)

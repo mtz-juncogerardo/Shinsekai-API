@@ -1,56 +1,89 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Azure.Storage;
-using Microsoft.Azure.Storage.Blob;
-using Microsoft.Extensions.Configuration;
-using Shinsekai_API.Config;
 
 namespace Shinsekai_API.Services
 {
-    public class BlobStorageService
+    public class BlobStorageService : IBlobService
     {
-        private CloudStorageAccount _storageAccount;
-        private CloudBlobClient _blobClient;
-        private CloudBlobContainer _blobContainer;
-        private ApiConfiguration _configuration;
+        private readonly BlobContainerClient _containerClient;
+        private readonly string _path;
+        private const string MainPath = "https://shinsekai.blob.core.windows.net/";
 
-        public BlobStorageService(string containerName, IConfiguration configuration)
+        public BlobStorageService(BlobServiceClient blobServiceClient, string containerId = "shinsekai-storage")
         {
-            _storageAccount = CloudStorageAccount.Parse(new ApiConfiguration(configuration).SvrConnectionString);
-            _blobClient = _storageAccount.CreateCloudBlobClient();
-            _blobContainer = _blobClient.GetContainerReference(containerName);
+            _containerClient = blobServiceClient.GetBlobContainerClient(containerId);
+            _path = $"{MainPath}{containerId}/";
+            CreateNewBlobStorage();
         }
 
-        public void CreateNewBlobStorage(BlobContainerPublicAccessType accesType)
+        private void CreateNewBlobStorage()
         {
-            _blobContainer.CreateIfNotExists();
-            _blobContainer.SetPermissions(new BlobContainerPermissions
-            {
-                PublicAccess = accesType
-            });
+            _containerClient.CreateIfNotExists();
         }
 
-        public async Task<string> UploadFileToStorage(IFormFile myFile, string fileName)
+        public async Task<string> GetBlobAsync(string fileName = null)
         {
-            var myBlob = _blobContainer.GetBlockBlobReference(fileName);
-            var totalSize = myFile.Length;
-            var fileBytes = new byte[myFile.Length];
+            var filePath = "";
 
-            using (var fileStream = myFile.OpenReadStream())
+            await foreach (var item in _containerClient.GetBlobsAsync())
             {
-                var offset = 0;
-
-                while (offset < myFile.Length)
+                if (fileName == null)
                 {
-                    var chunkSize = totalSize - offset < 8192 ? (int) totalSize - offset : 8192;
-
-                    offset += await fileStream.ReadAsync(fileBytes, offset, chunkSize);
+                    filePath = $"{_path}{item.Name}";
+                    break;
                 }
-                
-                myBlob.UploadFromStream(fileStream);
+                if (item.Name == fileName)
+                {
+                    filePath = $"{_path}{item.Name}";
+                    break;
+                }
             }
 
-            return fileName;
+            return filePath;
+        }
+
+        public async Task<IEnumerable<string>> ListBlobAsync()
+        {
+            var files = new List<string>();
+
+            await foreach (var item in _containerClient.GetBlobsAsync())
+            {
+                files.Add($"{_path}{item.Name}");
+            }
+
+            return files;
+        }
+
+        public async Task<string> UploadContentBlobAsync(IFormFile content, string fileName)
+        {
+            var length = content.Length;
+            if (length < 0)
+            {
+                return null;
+            }
+            
+            var fullName = fileName + "." + content.ContentType.Split("/")[1];
+            var blobClient = _containerClient.GetBlobClient(fullName);
+
+            await using (var fileStream = content.OpenReadStream())
+            {
+                await blobClient.UploadAsync(fileStream, new BlobHttpHeaders
+                {
+                    ContentType = fileName.GetContentType()
+                });
+            }
+
+            return _path + fullName;
+        }
+
+        public async Task DeleteBlobAsync(string blobName)
+        {
+            var blobContainer = _containerClient.GetBlobClient(blobName);
+            await blobContainer.DeleteIfExistsAsync();
         }
     }
 }

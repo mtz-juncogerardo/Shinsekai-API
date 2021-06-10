@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +32,9 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
+
+            search ??= "";
+
             if (byAnime)
             {
                 var dbAnimes = _context.Animes.Where(a => a.Name.Trim().ToLower()
@@ -41,7 +45,7 @@ namespace Shinsekai_API.Controllers
                     Response = dbAnimes
                 });
             }
-            
+
             if (byBrand)
             {
                 var dbBrands = _context.Brands.Where(b => b.Name.Trim().ToLower()
@@ -75,7 +79,7 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            return BadRequest( new ErrorResponse()
+            return BadRequest(new ErrorResponse()
             {
                 Error = "No Category specified"
             });
@@ -92,17 +96,21 @@ namespace Shinsekai_API.Controllers
                     Error = "You dont have the required role"
                 });
             }
-            
+
             anime.Id = Guid.NewGuid().ToString();
-            _context.Animes.Add(new AnimeItem() {Id = anime.Id, Name = anime.Name});
+            _context.Animes.Add(new AnimeItem()
+            {
+                Id = anime.Id,
+                Name = anime.Name
+            });
             _context.SaveChanges();
 
             return Ok(new OkResponse()
             {
-                Response = "Anime Tag has been saved"
+                Response = anime
             });
         }
-        
+
         [Authorize]
         [HttpPost("brand/create")]
         public IActionResult SaveBrandTag([FromBody] BrandItem brand)
@@ -114,17 +122,21 @@ namespace Shinsekai_API.Controllers
                     Error = "You dont have the required role"
                 });
             }
-            
+
             brand.Id = Guid.NewGuid().ToString();
-            _context.Brands.Add(new BrandItem() {Id = brand.Id, Name = brand.Name});
+            _context.Brands.Add(new BrandItem()
+            {
+                Id = brand.Id,
+                Name = brand.Name
+            });
             _context.SaveChanges();
 
             return Ok(new OkResponse()
             {
-                Response = "Brand Tag has been saved"
+                Response = brand
             });
         }
-        
+
         [Authorize]
         [HttpPost("line/create")]
         public IActionResult SaveLineTag([FromBody] LineItem line)
@@ -143,10 +155,10 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "Line Tag has been saved"
+                Response = line
             });
         }
-        
+
         [Authorize]
         [HttpPost("material/create")]
         public IActionResult SaveMaterialTag([FromBody] MaterialItem material)
@@ -165,10 +177,10 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "Material Tag has been saved"
+                Response = material
             });
         }
-        
+
         [Authorize]
         [HttpDelete("anime/delete")]
         public IActionResult DeleteAnimeTag([FromQuery] string id)
@@ -195,19 +207,30 @@ namespace Shinsekai_API.Controllers
             {
                 return BadRequest(new ErrorResponse()
                 {
-                    Error = "El Articulo que intentas eliminar ya no existe"
+                    Error = "El tag que intentas eliminar ya no existe"
                 });
             }
 
-            _context.Remove(dbAnime);
-            _context.SaveChanges();
+            try
+            {
+
+                _context.Remove(dbAnime);
+                _context.SaveChanges();
+            }
+            catch
+            {
+                return Ok(new ErrorResponse()
+                {
+                    Error = "El Tag pertenece a algún articulo."
+                });
+            }
 
             return Ok(new OkResponse()
             {
                 Response = "La anime se elimino con exito"
             });
         }
-        
+
         [Authorize]
         [HttpDelete("line/delete")]
         public IActionResult DeleteLineTag([FromQuery] string id)
@@ -238,8 +261,18 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            _context.Remove(dbLine);
-            _context.SaveChanges();
+            try
+            {
+                _context.Remove(dbLine);
+                _context.SaveChanges();
+            }
+            catch
+            {
+                return Ok(new ErrorResponse()
+                {
+                    Error = "El Tag pertenece a algún articulo."
+                });
+            }
 
             return Ok(new OkResponse()
             {
@@ -277,15 +310,25 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            _context.Remove(dbMaterial);
-            _context.SaveChanges();
+            try
+            {
+                _context.Remove(dbMaterial);
+                _context.SaveChanges();
+            }
+            catch
+            {
+                return Ok(new ErrorResponse()
+                {
+                    Error = "El Tag pertenece a algún articulo."
+                });
+            }
 
             return Ok(new OkResponse()
             {
-                Response = "La material se elimino con exito"
+                Response = "El material se elimino con exito"
             });
         }
-        
+
         [Authorize]
         [HttpDelete("brand/delete")]
         public IActionResult DeleteBrandTag([FromQuery] string id)
@@ -316,8 +359,18 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            _context.Remove(dbBrand);
-            _context.SaveChanges();
+            try
+            {
+                _context.Remove(dbBrand);
+                _context.SaveChanges();
+            }
+            catch
+            {
+                return Ok(new ErrorResponse()
+                {
+                    Error = "El Tag pertenece a algún articulo."
+                });
+            }
 
             return Ok(new OkResponse()
             {

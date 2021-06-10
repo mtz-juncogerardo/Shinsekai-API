@@ -16,11 +16,13 @@ namespace Shinsekai_API.Controllers
     public class ArticleController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
-        private const int _numberOfElementsInPage = 20;
+        private const int _numberOfElementsInPage = 25;
+        private readonly IBlobService _blobService;
 
-        public ArticleController(ShinsekaiApiContext context)
+        public ArticleController(ShinsekaiApiContext context, IBlobService blobService)
         {
             _context = context;
+            _blobService = blobService;
         }
 
         [HttpGet]
@@ -123,11 +125,11 @@ namespace Shinsekai_API.Controllers
                 dbArticles = dbArticles.OrderByDescending(a => a.DateAdded).ToList();
             }
 
-            dbArticles.ForEach(a => a.Brand = _context.Brands.FirstOrDefault(b => b.Id == a.BrandId));
             var articleCount = dbArticles.Count;
             var maxPages = (int)Math.Ceiling(articleCount / (decimal)_numberOfElementsInPage);
-            var articlesByPage = dbArticles.Skip(elementsToSkip).Take(_numberOfElementsInPage);
-            var responseArticles = articlesByPage.Select(article => new ArticleResponse(article, _context));
+            var articlesByPage = dbArticles.Skip(elementsToSkip).Take(_numberOfElementsInPage).ToList();
+            articlesByPage.ForEach(a => a.Brand = _context.Brands.FirstOrDefault(b => b.Id == a.BrandId));
+            var responseArticles = articlesByPage.Select(article => new ArticleResponse(article)).ToList();
 
             return Ok(new OkResponse()
             {
@@ -168,10 +170,48 @@ namespace Shinsekai_API.Controllers
                     Error = "Tu articulo necesita al menos una imagen"
                 });
             }
-
+            
             article.Id = Guid.NewGuid().ToString();
             article.DateAdded = DateTime.Now;
-            article.Images.ForEach(i => i.Id = Guid.NewGuid().ToString());
+            article.AnimesArticles = new List<AnimeArticleItem>();
+            article.LinesArticles = new List<LineArticleItem>();
+            article.MaterialsArticles = new List<MaterialArticleItem>();
+
+            foreach (var line in article.Lines)
+            {
+                var lineArticle = new LineArticleItem()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ArticleId = article.Id,
+                    LineId = line.Id
+                };
+                
+                article.LinesArticles.Add(lineArticle);
+            }
+
+            foreach (var anime in article.Animes)
+            {
+                var animeArticle = new AnimeArticleItem()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ArticleId = article.Id,
+                    AnimeId = anime.Id
+                };
+                
+                article.AnimesArticles.Add(animeArticle);
+            }
+
+            foreach (var material in article.Materials)
+            {
+                var materialArticle = new MaterialArticleItem()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ArticleId = article.Id,
+                    MaterialId = material.Id
+                };
+                
+                article.MaterialsArticles.Add(materialArticle);
+            }
 
             if (article.OriginalFlag)
             {
@@ -188,11 +228,13 @@ namespace Shinsekai_API.Controllers
                 _context.Articles.Add(article);
             }
 
+            var responseArticle = new ArticleResponse(article);
+
             _context.SaveChanges();
 
             return Ok(new OkResponse()
             {
-                Response = "Article Published"
+                Response = responseArticle
             });
         }
 
@@ -291,6 +333,7 @@ namespace Shinsekai_API.Controllers
 
             foreach (var image in dbImages)
             {
+                _blobService.DeleteBlobAsync(image.Path);
                 _context.Remove(image);
             }
             
@@ -302,5 +345,18 @@ namespace Shinsekai_API.Controllers
                 Response = "El articulo se elimino con exito"
             });
         }
+
+        [HttpGet("originals")]
+        public IActionResult GetOriginals()
+        {
+            var dbOriginals = _context.Articles.Where(r => r.OriginalFlag)
+                .OrderBy(r => r.Name).ToList();
+
+            return Ok(new OkResponse() 
+            {
+                Response = dbOriginals
+            });
+        }
+
     }
 }

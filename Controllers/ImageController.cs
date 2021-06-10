@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.JSInterop.Infrastructure;
 using Shinsekai_API.Authentication;
 using Shinsekai_API.Models;
 using Shinsekai_API.Responses;
@@ -17,17 +18,17 @@ namespace Shinsekai_API.Controllers
     public class ImageController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
-        private readonly IConfiguration _configuration;
+        private readonly IBlobService _blobService;
 
-        public ImageController(ShinsekaiApiContext context, IConfiguration configuration)
+        public ImageController(ShinsekaiApiContext context, IBlobService blobService)
         {
             _context = context;
-            _configuration = configuration;
+            _blobService = blobService;
         }
 
         [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> SaveImage([FromForm] IFormFile myFile)
+        [HttpPost, DisableRequestSizeLimit]
+        public async Task<IActionResult> SaveImages()
         {
             if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
             {
@@ -37,26 +38,54 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            var blobService = new BlobStorageService("shinsekai", _configuration);
-            var id = Guid.NewGuid().ToString();
-            string path;
-            try
+            var imageFile = Request.Form.Files[0];
+            var imageItem = new ImageResponse
             {
-                 path = await blobService.UploadFileToStorage(myFile, id);
-            }
-            catch (Exception e)
+                Id = Guid.NewGuid().ToString()
+            };
+            
+            imageItem.Path = await _blobService.UploadContentBlobAsync(imageFile, imageItem.Id);
+
+            if (imageItem.Path == null)
             {
                 return BadRequest(new ErrorResponse()
                 {
-                    Error = e
+                    Error = "No se pudo subir la imagen"
                 });
             }
 
             return Ok(new OkResponse()
             {
-                Response = $"La imagen se guardo en el path: {path}"
+                Response = imageItem
             });
         }
 
+        [Authorize]
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeleteTempImages([FromQuery] string blob)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            if (blob == null)
+            {
+                return BadRequest(new ErrorResponse() 
+                {
+                    Error = "Define el nombre de la imagen a borrar"
+                });
+            }
+
+            await _blobService.DeleteBlobAsync(blob);
+
+            return Ok(new OkResponse()
+            {
+                Response = "DONE"
+            });
+        }
     }
 }

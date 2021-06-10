@@ -140,7 +140,7 @@ namespace Shinsekai_API.Controllers
                 }).OrderBy(p => p.PurchaseId)
                 .GroupBy(p => p.PurchaseId).ToList();
 
-            return Ok(new
+            return Ok(new OkResponse()
             {
                 Response = dbPurchases,
                 Count = dbPurchases.Count

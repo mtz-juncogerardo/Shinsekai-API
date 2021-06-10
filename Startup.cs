@@ -1,4 +1,5 @@
 using System.Text;
+using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Shinsekai_API.Config;
 using Shinsekai_API.Models;
+using Shinsekai_API.Services;
 
 namespace Shinsekai_API
 {
@@ -58,6 +60,8 @@ namespace Shinsekai_API
                     options => {
                             options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore; 
                         });
+            services.AddSingleton(r => new BlobServiceClient(configuration.BlobStorageConnectionString));
+            services.AddSingleton<IBlobService, BlobStorageService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
