@@ -15,5 +15,7 @@ namespace Shinsekai_API.Services
         Task<string> UploadContentBlobAsync(IFormFile content, string fileName); 
 
         Task DeleteBlobAsync(string blobName);
+
+        void DeleteManyBlobs(IEnumerable<string> blobsPath);
     }
 }

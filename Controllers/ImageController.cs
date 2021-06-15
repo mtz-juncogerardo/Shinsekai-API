@@ -43,7 +43,7 @@ namespace Shinsekai_API.Controllers
             {
                 Id = Guid.NewGuid().ToString()
             };
-            
+
             imageItem.Path = await _blobService.UploadContentBlobAsync(imageFile, imageItem.Id);
 
             if (imageItem.Path == null)
@@ -74,10 +74,20 @@ namespace Shinsekai_API.Controllers
 
             if (blob == null)
             {
-                return BadRequest(new ErrorResponse() 
+                return BadRequest(new ErrorResponse()
                 {
                     Error = "Define el nombre de la imagen a borrar"
                 });
+            }
+
+            var imageId = blob.Split('.')[0];
+
+            var imageItem = _context.Images.FirstOrDefault(i => i.Id == imageId);
+
+            if (imageItem != null)
+            {
+                _context.Remove(imageItem);
+                await _context.SaveChangesAsync();
             }
 
             await _blobService.DeleteBlobAsync(blob);

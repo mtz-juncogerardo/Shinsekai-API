@@ -170,12 +170,23 @@ namespace Shinsekai_API.Controllers
                     Error = "Tu articulo necesita al menos una imagen"
                 });
             }
-            
+
             article.Id = Guid.NewGuid().ToString();
             article.DateAdded = DateTime.Now;
             article.AnimesArticles = new List<AnimeArticleItem>();
             article.LinesArticles = new List<LineArticleItem>();
             article.MaterialsArticles = new List<MaterialArticleItem>();
+
+            foreach (var image in article.Images)
+            {
+                var imageItem = new ImageItem()
+                {
+                    Id = image.Id,
+                    Path = image.Path,
+                    ArticleId = article.Id
+                };
+                _context.Images.Add(imageItem);
+            }
 
             foreach (var line in article.Lines)
             {
@@ -185,7 +196,7 @@ namespace Shinsekai_API.Controllers
                     ArticleId = article.Id,
                     LineId = line.Id
                 };
-                
+
                 article.LinesArticles.Add(lineArticle);
             }
 
@@ -197,7 +208,7 @@ namespace Shinsekai_API.Controllers
                     ArticleId = article.Id,
                     AnimeId = anime.Id
                 };
-                
+
                 article.AnimesArticles.Add(animeArticle);
             }
 
@@ -209,7 +220,7 @@ namespace Shinsekai_API.Controllers
                     ArticleId = article.Id,
                     MaterialId = material.Id
                 };
-                
+
                 article.MaterialsArticles.Add(materialArticle);
             }
 
@@ -291,11 +302,76 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
+            var lineArticles = _context.LinesArticles.Where(l => l.ArticleId == article.Id);
+            var animeArticles = _context.AnimesArticles.Where(a => a.ArticleId == article.Id);
+            var materialArticles = _context.MaterialsArticles.Where(a => a.ArticleId == article.Id);
+            
+            _context.RemoveRange(lineArticles);
+            _context.RemoveRange(animeArticles);
+            _context.RemoveRange(materialArticles);
+
+            article.LinesArticles = new List<LineArticleItem>();
+            article.MaterialsArticles = new List<MaterialArticleItem>();
+            article.AnimesArticles = new List<AnimeArticleItem>();
+            
+            foreach (var line in article.Lines)
+            {
+                var lineArticle = new LineArticleItem()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ArticleId = article.Id,
+                    LineId = line.Id
+                };
+
+                _context.LinesArticles.Add(lineArticle);
+            }
+
+            foreach (var anime in article.Animes)
+            {
+                var animeArticle = new AnimeArticleItem()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ArticleId = article.Id,
+                    AnimeId = anime.Id
+                };
+
+                _context.AnimesArticles.Add(animeArticle);
+            }
+
+            foreach (var material in article.Materials)
+            {
+                var materialArticle = new MaterialArticleItem()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ArticleId = article.Id,
+                    MaterialId = material.Id
+                };
+
+                _context.MaterialsArticles.Add(materialArticle);
+            }
+
+            foreach (var image in article.Images)
+            {
+                var imageExists = _context.Images.Any(a => a.Id == image.Id);
+
+                if (!imageExists)
+                {
+                    var imageItem = new ImageItem()
+                    {
+                        Id = image.Id,
+                        ArticleId = article.Id,
+                        Path = image.Path
+                    };
+                    _context.Images.Add(imageItem);
+                }
+            }
+
             article.UpdateContext(_context);
+            _context.SaveChanges();
 
             return Ok(new OkResponse()
             {
-                Response = "El articulo se actualizo con exito"
+                Response = article
             });
         }
 
@@ -333,10 +409,13 @@ namespace Shinsekai_API.Controllers
 
             foreach (var image in dbImages)
             {
-                _blobService.DeleteBlobAsync(image.Path);
+                var imagePath = image.Path.Split('.');
+                var imageType = imagePath[imagePath.Length - 1];
+                var blob = image.Id + '.' + imageType;
+                _blobService.DeleteBlobAsync(blob);
                 _context.Remove(image);
             }
-            
+
             _context.Remove(dbArticle);
             _context.SaveChanges();
 
@@ -352,7 +431,7 @@ namespace Shinsekai_API.Controllers
             var dbOriginals = _context.Articles.Where(r => r.OriginalFlag)
                 .OrderBy(r => r.Name).ToList();
 
-            return Ok(new OkResponse() 
+            return Ok(new OkResponse()
             {
                 Response = dbOriginals
             });

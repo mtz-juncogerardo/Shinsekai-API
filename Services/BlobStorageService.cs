@@ -85,5 +85,14 @@ namespace Shinsekai_API.Services
             var blobContainer = _containerClient.GetBlobClient(blobName);
             await blobContainer.DeleteIfExistsAsync();
         }
+
+        public void DeleteManyBlobs(IEnumerable<string> blobsPaths)
+        {
+            foreach (var path in blobsPaths)
+            {
+                var blobContainer = _containerClient.GetBlobClient(path);
+                blobContainer.DeleteIfExistsAsync(); 
+            }
+        }
     }
 }
