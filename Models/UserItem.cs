@@ -13,6 +13,7 @@ namespace Shinsekai_API.Models
         [MaxLength(12)] [DefaultValue(null)] public string Phone { get; set; }
         [MaxLength(150)] [DefaultValue(null)] public string Address { get; set; }
         [MaxLength(50)] [DefaultValue(null)] public string City { get; set; }
+        [MaxLength(5)] [DefaultValue(null)] public string PostalCode { get; set; }
         [MaxLength(36)] public string AuthParamsId { get; set; }
         public AuthParamItem AuthParams { get; set; }
         public List<ShoppingCartArticleItem> SoppingCartArticles { get; set; }

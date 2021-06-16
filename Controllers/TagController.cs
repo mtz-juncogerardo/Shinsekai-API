@@ -34,54 +34,63 @@ namespace Shinsekai_API.Controllers
 
 
             search ??= "";
+            var tags = new List<ITag>();
 
             if (byAnime)
             {
                 var dbAnimes = _context.Animes.Where(a => a.Name.Trim().ToLower()
-                        .Contains(search.Trim().ToLower()))
+                        .Contains(search.Trim().ToLower())).Select(t => new Tag
+                    {
+                        Id = t.Id,
+                        Name = t.Name,
+                        Type = "Anime"
+                    })
                     .ToList();
-                return Ok(new OkResponse()
-                {
-                    Response = dbAnimes
-                });
+                tags.AddRange(dbAnimes);
             }
 
             if (byBrand)
             {
                 var dbBrands = _context.Brands.Where(b => b.Name.Trim().ToLower()
-                        .Contains(search.Trim().ToLower()))
+                        .Contains(search.Trim().ToLower())).Select(t => new Tag
+                    {
+                        Id = t.Id,
+                        Name = t.Name,
+                        Type = "Brand"
+                    })
                     .ToList();
-                return Ok(new OkResponse()
-                {
-                    Response = dbBrands
-                });
+                tags.AddRange(dbBrands);
             }
 
             if (byMaterial)
             {
                 var dbMaterials = _context.Materials.Where(m => m.Name.Trim().ToLower()
-                        .Contains(search.Trim().ToLower()))
+                        .Contains(search.Trim().ToLower())).Select(t => new Tag
+                    {
+                        Id = t.Id,
+                        Name = t.Name,
+                        Type = "Material"
+                    })
                     .ToList();
-                return Ok(new OkResponse()
-                {
-                    Response = dbMaterials
-                });
+                tags.AddRange(dbMaterials);
             }
 
             if (byLine)
             {
                 var dbLines = _context.Lines.Where(l => l.Name.Trim().ToLower()
-                        .Contains(search.Trim().ToLower()))
+                        .Contains(search.Trim().ToLower())).Select(t => new Tag
+                    {
+                        Id = t.Id,
+                        Name = t.Name,
+                        Type = "Line"
+                    })
                     .ToList();
-                return Ok(new OkResponse()
-                {
-                    Response = dbLines
-                });
+                tags.AddRange(dbLines);
             }
 
-            return BadRequest(new ErrorResponse()
+            return Ok(new OkResponse()
             {
-                Error = "No Category specified"
+                Response = tags
             });
         }
 
@@ -211,15 +220,14 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            try
+            if (!_context.AnimesArticles.Any(a => a.AnimeId == dbAnime.Id))
             {
-
                 _context.Remove(dbAnime);
                 _context.SaveChanges();
             }
-            catch
+            else
             {
-                return Ok(new ErrorResponse()
+                return BadRequest(new ErrorResponse()
                 {
                     Error = "El Tag pertenece a algún articulo."
                 });
@@ -261,14 +269,14 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            try
+            if (!_context.LinesArticles.Any(l => l.LineId == dbLine.Id))
             {
                 _context.Remove(dbLine);
                 _context.SaveChanges();
             }
-            catch
+            else
             {
-                return Ok(new ErrorResponse()
+                return BadRequest(new ErrorResponse()
                 {
                     Error = "El Tag pertenece a algún articulo."
                 });
@@ -310,14 +318,14 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            try
+            if (!_context.MaterialsArticles.Any(m => m.MaterialId == dbMaterial.Id))
             {
                 _context.Remove(dbMaterial);
                 _context.SaveChanges();
             }
-            catch
+            else
             {
-                return Ok(new ErrorResponse()
+                return BadRequest(new ErrorResponse()
                 {
                     Error = "El Tag pertenece a algún articulo."
                 });
@@ -366,7 +374,7 @@ namespace Shinsekai_API.Controllers
             }
             catch
             {
-                return Ok(new ErrorResponse()
+                return BadRequest(new ErrorResponse()
                 {
                     Error = "El Tag pertenece a algún articulo."
                 });

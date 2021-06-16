@@ -43,7 +43,7 @@ namespace Shinsekai_API.Controllers
                     MaxPage = 1
                 });
             }
-            
+
             var dbResponse = dbQuestion.Where(r => r.Id == id);
             return Ok(new OkResponse()
             {
@@ -87,12 +87,12 @@ namespace Shinsekai_API.Controllers
 
             if (question.Id == null)
             {
-                return BadRequest(new ErrorResponse() 
+                return BadRequest(new ErrorResponse()
                 {
                     Error = "Id not specified"
                 });
             }
-            
+
             var entityExistsFlag = _context.Questions.Any(q => q.Id == question.Id);
 
             if (!entityExistsFlag)
@@ -102,7 +102,7 @@ namespace Shinsekai_API.Controllers
                     Error = "Question Invalid Id"
                 });
             }
-            
+
             _context.Update(question);
             _context.SaveChanges();
 
@@ -111,7 +111,7 @@ namespace Shinsekai_API.Controllers
                 Response = "Question has been updated"
             });
         }
-        
+
         [Authorize]
         [HttpDelete("questions/delete")]
         public IActionResult DeleteQuestion([FromQuery] string id)
@@ -150,7 +150,7 @@ namespace Shinsekai_API.Controllers
                 Response = "La pregunta se elimino con exito"
             });
         }
-        
+
         [Authorize]
         [HttpPost("locations/create")]
         public IActionResult SaveLocation(LocationItem location)
@@ -172,7 +172,7 @@ namespace Shinsekai_API.Controllers
                 Response = "Location was added succesfully"
             });
         }
-        
+
         [Authorize]
         [HttpGet("locations/read")]
         public IActionResult GetLocations([FromQuery] string id)
@@ -196,7 +196,7 @@ namespace Shinsekai_API.Controllers
                     MaxPage = 1
                 });
             }
-            
+
             var dbResponse = dbLocation.Where(l => l.Id == id);
             return Ok(new OkResponse()
             {
@@ -221,12 +221,12 @@ namespace Shinsekai_API.Controllers
 
             if (location.Id == null)
             {
-                return BadRequest(new ErrorResponse() 
+                return BadRequest(new ErrorResponse()
                 {
                     Error = "Id not specified"
                 });
             }
-            
+
             var entityExistsFlag = _context.Locations.Any(q => q.Id == location.Id);
 
             if (!entityExistsFlag)
@@ -236,7 +236,7 @@ namespace Shinsekai_API.Controllers
                     Error = "location Invalid Id"
                 });
             }
-            
+
             _context.Update(location);
             _context.SaveChanges();
 
@@ -245,7 +245,7 @@ namespace Shinsekai_API.Controllers
                 Response = "location has been updated"
             });
         }
-        
+
         [Authorize]
         [HttpDelete("locations/delete")]
         public IActionResult DeleteLocation([FromQuery] string id)
@@ -284,6 +284,68 @@ namespace Shinsekai_API.Controllers
                 Response = "La locacion se elimino con exito"
             });
         }
-        
+
+        [Authorize]
+        [HttpGet("users")]
+        public IActionResult GetUsers()
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            var id = AuthService.IdentifyUser(User.Identity);
+
+            var dbUsers = _context.Users.ToList();
+
+            return Ok(new OkResponse()
+            {
+                Response = dbUsers
+            });
+        }
+
+        [Authorize]
+        [HttpPut("users")]
+        public IActionResult UpdateAdminUser(UserItem user)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            var dbUser = _context.Users.FirstOrDefault(u => u.Id == user.Id);
+
+            if (dbUser == null)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "El usuario ya no existe"
+                });
+            }
+
+            if (user.Admin == dbUser.Admin)
+            {
+                return Ok();
+            }
+
+            dbUser.Admin = user.Admin;
+
+            _context.Update(dbUser);
+            _context.SaveChanges();
+
+            var query = dbUser.Admin ? $"Se le han concedido permisos de administrador al usuario: {dbUser.Name ?? dbUser.Email}" : $"Se le retiraron los permisos para administrar al usuario: {dbUser.Name ?? dbUser.Email}";
+
+
+            return Ok(new OkResponse()
+            {
+                Response = query 
+            });
+        }
     }
 }
