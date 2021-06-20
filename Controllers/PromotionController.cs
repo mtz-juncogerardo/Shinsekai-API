@@ -9,7 +9,7 @@ using Shinsekai_API.Responses;
 namespace Shinsekai_API.Controllers
 {
     [ApiController]
-    [Route("promotions")]
+    [Route("api/promotions")]
     public class PromotionController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
@@ -68,7 +68,7 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "New Promotion Published"
+                Response = promotion
             });
         }
 
@@ -107,7 +107,7 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "Promotion has been updated"
+                Response = promotion
             });
         }
 
