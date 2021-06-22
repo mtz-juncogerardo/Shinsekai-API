@@ -9,7 +9,7 @@ using Shinsekai_API.Responses;
 namespace Shinsekai_API.Controllers
 {
     [ApiController]
-    [Route("carousels")]
+    [Route("api/carousels")]
     public class CarouselController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
@@ -68,7 +68,7 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "New Carousel Published"
+                Response = carousel
             });
         }
 
@@ -107,7 +107,7 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "Carousel has been updated"
+                Response = carousel
             });
         }
 
@@ -137,7 +137,7 @@ namespace Shinsekai_API.Controllers
             {
                 return BadRequest(new ErrorResponse()
                 {
-                    Error = "El Articulo que intentas eliminar ya no existe"
+                    Error = "El Carrusel que intentas eliminar ya no existe"
                 });
             }
 
@@ -146,7 +146,7 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "La carousel se elimino con exito"
+                Response = "El carousel se elimino con exito"
             });
         }
     }

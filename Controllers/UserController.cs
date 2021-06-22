@@ -137,7 +137,7 @@ namespace Shinsekai_API.Controllers
                     paa.PurchaseArticle.PurchaseId,
                     paa.PurchaseArticle.Purchase.Date,
                     paa.PurchaseArticle.Article
-                }).OrderBy(p => p.PurchaseId)
+                }).OrderBy(p => p.PurchaseId).AsEnumerable()
                 .GroupBy(p => p.PurchaseId).ToList();
 
             return Ok(new OkResponse()

@@ -16,7 +16,7 @@ using Stripe.Checkout;
 namespace Shinsekai_API.Controllers
 {
     [ApiController]
-    [Route("purchase")]
+    [Route("api/purchases")]
     public class PurchaseController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
@@ -27,6 +27,50 @@ namespace Shinsekai_API.Controllers
             _context = context;
             _configuration = configuration;
         }
+
+        [Authorize]
+        [HttpGet("read")]
+        public IActionResult GetPurchasesForAdmin([FromQuery] string id)
+        {
+            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
+            {
+                return Unauthorized(new ErrorResponse()
+                {
+                    Error = "You dont have the required role"
+                });
+            }
+
+            var dbPurchases = _context.PurchasesArticles.Join(_context.Articles,
+                    pa => pa.ArticleId,
+                    a => a.Id,
+                    (pa, a) => new
+                    {
+                        PurchaseArticle = pa,
+                        Article = a
+                    }).Join(_context.Purchases,
+                    paa => paa.PurchaseArticle.PurchaseId,
+                    p => p.Id,
+                    (paa, p) => new
+                    {
+                        PurchaseArticleArticle = paa,
+                        Purchase = p
+                    }).Join(_context.Users,
+                    paap => paap.Purchase.UserId,
+                    u => u.Id,
+                    (paap, u) => new
+                    {
+                        PurchaseArticleArticlePurchase = paap,
+                        User = u
+                    }).Select(paapu => paapu.PurchaseArticleArticlePurchase.Purchase)
+                .AsEnumerable()
+                .GroupBy(p => p.UserId);
+
+            return Ok(new OkResponse()
+            {
+                Response = dbPurchases
+            });
+        }
+
 
         [Authorize]
         [HttpPost("checkout")]
@@ -86,7 +130,7 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            var buyer = _context.Users.FirstOrDefault(u => u.Id == purchase.UserId);
+            var buyer = _context.Users.FirstOrDefault(u => u.Id == purchase.Id);
 
             if (buyer == null)
             {
@@ -114,7 +158,7 @@ namespace Shinsekai_API.Controllers
             {
                 return BadRequest(new ErrorResponse()
                 {
-                    Error = "You must specify an Adress, a City, a Name and a Phone so we can authorize to buy"
+                    Error = "Se debe especificar una dirección, una ciudad, un nombre y un telefono para autorizar la compra."
                 });
             }
 
@@ -127,28 +171,41 @@ namespace Shinsekai_API.Controllers
             {
                 var articleId = purchaseArticle.ArticleId ?? purchaseArticle.Article.Id;
                 var dbArticle = _context.Articles.FirstOrDefault(a => a.Id == articleId);
-                if (dbArticle is not {Stock: > 0})
+                if (dbArticle == null)
                 {
                     return BadRequest(new ErrorResponse()
                     {
-                        Error = "Some articles arent in stock anymore or doesnt exist"
+                        Error = "Estas comprando un articulo que no existe"
                     });
                 }
 
-                var sale = new SaleItem()
+                if (dbArticle is {Stock: > 0} && dbArticle.Stock < purchaseArticle.Quantity)
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    ArticleId = articleId,
-                    SoldDate = DateTime.Now
-                };
+                    return BadRequest(new ErrorResponse()
+                    {
+                        Error = "Uno de los articulos que intentas comprar ya no se encuentra disponible."
+                    });
+                }
+
+                for (var i = 0; i < purchaseArticle.Quantity; i++)
+                {
+                    var sale = new SaleItem()
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        ArticleId = articleId,
+                        SoldDate = DateTime.Now
+                    };
+
+                    _context.Sales.Add(sale);
+                }
+
                 purchaseArticle.Article = dbArticle;
                 purchaseArticle.Id = Guid.NewGuid().ToString();
                 purchaseArticle.PurchaseId = purchase.Id;
-                dbArticle.Stock--;
+                dbArticle.Stock -= purchaseArticle.Quantity;
 
                 purchase.PurchasesArticles.Add(purchaseArticle);
 
-                _context.Sales.Add(sale);
                 _context.Articles.Update(dbArticle);
             }
 
@@ -187,6 +244,7 @@ namespace Shinsekai_API.Controllers
                 Id = Guid.NewGuid().ToString()
             };
 
+            _context.Purchases.Add(purchase);
             _context.Points.Add(pointItem);
             _context.SaveChanges();
 

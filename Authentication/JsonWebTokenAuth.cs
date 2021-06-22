@@ -52,7 +52,7 @@ namespace Shinsekai_API.Authentication
                     new (ClaimTypes.Hash, _password),
                     new (ClaimTypes.Authentication, _salt)
                 },
-                expires: _smallExpiration ? DateTime.Now.AddMinutes(5) : DateTime.Now.AddDays(1),
+                expires: _smallExpiration ? DateTime.Now.AddMinutes(5) : DateTime.Now.AddDays(3),
                 signingCredentials: loginCredentials
             );
             var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
