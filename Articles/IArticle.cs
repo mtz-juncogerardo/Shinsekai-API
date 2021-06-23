@@ -16,5 +16,6 @@ namespace Shinsekai_API.Interfaces
         public bool OriginalFlag { get; set; }
         public string Details { get; set; }
         public DateTime DateAdded { get; set; }
+        public int Quantity { get; set; }
     }
 }

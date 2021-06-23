@@ -17,6 +17,7 @@ namespace Shinsekai_API.Responses
         public bool OriginalFlag { get; set; }
         public string Details { get; set; }
         public DateTime DateAdded { get; set; }
+        public int Quantity { get; set; }
         public List<Tag> Brand { get; set; }
         public List<Image> Images { get; set; }
 
@@ -46,7 +47,7 @@ namespace Shinsekai_API.Responses
             OriginalFlag = article.OriginalFlag;
         }
 
-        public ArticleResponse(ArticleItem article)
+        public ArticleResponse(ArticleItem article, int quantity = 0)
         {
             Id = article.Id;
             Name = article.Name;
@@ -56,7 +57,8 @@ namespace Shinsekai_API.Responses
             Stock = article.Stock;
             DateAdded = article.DateAdded;
             DiscountPrice = article.DiscountPrice;
-            OriginalFlag = article.OriginalFlag; 
+            OriginalFlag = article.OriginalFlag;
+            Quantity = quantity;
         }
 
         private static IEnumerable<Tag> GetAnimes(ShinsekaiApiContext context, string articleId)

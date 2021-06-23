@@ -40,6 +40,8 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
+            var response = new List<PurchaseResponse>();
+
             var dbPurchases = _context.PurchasesArticles.Join(_context.Articles,
                     pa => pa.ArticleId,
                     a => a.Id,
@@ -61,16 +63,32 @@ namespace Shinsekai_API.Controllers
                     {
                         PurchaseArticleArticlePurchase = paap,
                         User = u
-                    }).Select(paapu => paapu.PurchaseArticleArticlePurchase.Purchase)
+                    }).Select(paapu => paapu)
+                .OrderBy(p => p.PurchaseArticleArticlePurchase.Purchase.Date)
                 .AsEnumerable()
-                .GroupBy(p => p.UserId);
+                .GroupBy(p => p.PurchaseArticleArticlePurchase.Purchase.Id);
+
+            foreach (var purchase in dbPurchases)
+            {
+                var articles = purchase.Select(r => new ArticleResponse(
+                                                                    r.PurchaseArticleArticlePurchase.PurchaseArticleArticle.Article,
+                                                                    r.PurchaseArticleArticlePurchase.PurchaseArticleArticle.PurchaseArticle.Quantity));
+
+                response.Add(new PurchaseResponse()
+                {
+                    Id = purchase.Select(r => r.PurchaseArticleArticlePurchase.Purchase.Id).First(),
+                    Articles = articles,
+                    Buyer = purchase.Select(r => r.User).First(),
+                    PurchaseDate = purchase.Select(r => r.PurchaseArticleArticlePurchase.Purchase.Date).First(),
+                    Total = purchase.Select(r => r.PurchaseArticleArticlePurchase.Purchase.Total).First()
+                });
+            }
 
             return Ok(new OkResponse()
             {
-                Response = dbPurchases
+                Response = response
             });
         }
-
 
         [Authorize]
         [HttpPost("checkout")]
