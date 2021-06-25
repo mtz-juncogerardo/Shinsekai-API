@@ -171,10 +171,9 @@ namespace Shinsekai_API.Migrations
                     b.Property<int>("EstimatedDays")
                         .HasColumnType("int");
 
-                    b.Property<string>("LocationId")
+                    b.Property<string>("Location")
                         .IsRequired()
-                        .HasMaxLength(36)
-                        .HasColumnType("nvarchar(36)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Parcel")
                         .IsRequired()
@@ -182,9 +181,6 @@ namespace Shinsekai_API.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LocationId")
-                        .IsUnique();
 
                     b.ToTable("Deliveries");
                 });
@@ -275,22 +271,6 @@ namespace Shinsekai_API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Lines");
-                });
-
-            modelBuilder.Entity("Shinsekai_API.Models.LocationItem", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasMaxLength(36)
-                        .HasColumnType("nvarchar(36)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Locations");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.MaterialArticleItem", b =>
@@ -620,17 +600,6 @@ namespace Shinsekai_API.Migrations
                     b.Navigation("Brand");
                 });
 
-            modelBuilder.Entity("Shinsekai_API.Models.DeliveryItem", b =>
-                {
-                    b.HasOne("Shinsekai_API.Models.LocationItem", "Location")
-                        .WithOne("Delivery")
-                        .HasForeignKey("Shinsekai_API.Models.DeliveryItem", "LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Location");
-                });
-
             modelBuilder.Entity("Shinsekai_API.Models.FavoriteItem", b =>
                 {
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
@@ -834,11 +803,6 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.LineItem", b =>
                 {
                     b.Navigation("LinesArticles");
-                });
-
-            modelBuilder.Entity("Shinsekai_API.Models.LocationItem", b =>
-                {
-                    b.Navigation("Delivery");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.MaterialItem", b =>

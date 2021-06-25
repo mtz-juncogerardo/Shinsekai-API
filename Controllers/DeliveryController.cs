@@ -69,7 +69,7 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "New Delivery Published"
+                Response = delivery
             });
         }
 
@@ -108,7 +108,7 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "Delivery has been updated"
+                Response = delivery
             });
         }
 

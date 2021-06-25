@@ -9,7 +9,6 @@ namespace Shinsekai_API.Models
         [MaxLength(36)] public string Id { get; set; }
         [Required] [MaxLength(50)] public string Parcel { get; set; }
         [Required] [DefaultValue(1)] public int EstimatedDays{ get; set; }
-        [Required] [MaxLength(36)] public string LocationId { get; set; }
-        public LocationItem Location { get; set; }
+        [Required] [MaxLength(20)] public string Location { get; set; }
     }
 }

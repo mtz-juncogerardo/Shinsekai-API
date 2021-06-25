@@ -69,7 +69,7 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "New Question Published"
+                Response = question
             });
         }
 
@@ -108,7 +108,7 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "Question has been updated"
+                Response = question
             });
         }
 
@@ -148,140 +148,6 @@ namespace Shinsekai_API.Controllers
             return Ok(new OkResponse()
             {
                 Response = "La pregunta se elimino con exito"
-            });
-        }
-
-        [Authorize]
-        [HttpPost("locations/create")]
-        public IActionResult SaveLocation(LocationItem location)
-        {
-            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
-            {
-                return Unauthorized(new ErrorResponse()
-                {
-                    Error = "You dont have the required role"
-                });
-            }
-
-            location.Id = Guid.NewGuid().ToString();
-            _context.Locations.Add(location);
-            _context.SaveChanges();
-
-            return Ok(new OkResponse()
-            {
-                Response = "Location was added succesfully"
-            });
-        }
-
-        [Authorize]
-        [HttpGet("locations/read")]
-        public IActionResult GetLocations([FromQuery] string id)
-        {
-            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
-            {
-                return Unauthorized(new ErrorResponse()
-                {
-                    Error = "You dont have the required role"
-                });
-            }
-
-            var dbLocation = _context.Locations.ToList();
-            if (id == null)
-            {
-                return Ok(new OkResponse()
-                {
-                    Response = dbLocation,
-                    Count = dbLocation.Count,
-                    Page = 1,
-                    MaxPage = 1
-                });
-            }
-
-            var dbResponse = dbLocation.Where(l => l.Id == id);
-            return Ok(new OkResponse()
-            {
-                Response = dbResponse,
-                Count = 1,
-                Page = 1,
-                MaxPage = 1
-            });
-        }
-
-        [Authorize]
-        [HttpPut("locations/update")]
-        public IActionResult UpdateLocation([FromBody] LocationItem location)
-        {
-            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
-            {
-                return Unauthorized(new ErrorResponse()
-                {
-                    Error = "You dont have the required role"
-                });
-            }
-
-            if (location.Id == null)
-            {
-                return BadRequest(new ErrorResponse()
-                {
-                    Error = "Id not specified"
-                });
-            }
-
-            var entityExistsFlag = _context.Locations.Any(q => q.Id == location.Id);
-
-            if (!entityExistsFlag)
-            {
-                return BadRequest(new ErrorResponse()
-                {
-                    Error = "location Invalid Id"
-                });
-            }
-
-            _context.Update(location);
-            _context.SaveChanges();
-
-            return Ok(new OkResponse()
-            {
-                Response = "location has been updated"
-            });
-        }
-
-        [Authorize]
-        [HttpDelete("locations/delete")]
-        public IActionResult DeleteLocation([FromQuery] string id)
-        {
-            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
-            {
-                return Unauthorized(new ErrorResponse()
-                {
-                    Error = "You dont have the required role"
-                });
-            }
-
-            if (id == null)
-            {
-                return BadRequest(new ErrorResponse()
-                {
-                    Error = "No se especifico una locacion para eliminar"
-                });
-            }
-
-            var dbLocation = _context.Locations.FirstOrDefault(q => q.Id == id);
-
-            if (dbLocation == null)
-            {
-                return BadRequest(new ErrorResponse()
-                {
-                    Error = "La locacion que intentas eliminar ya no existe"
-                });
-            }
-
-            _context.Remove(dbLocation);
-            _context.SaveChanges();
-
-            return Ok(new OkResponse()
-            {
-                Response = "La locacion se elimino con exito"
             });
         }
 

@@ -19,7 +19,6 @@ namespace Shinsekai_API.Models
         public DbSet<ImageItem> Images { get; set; }
         public DbSet<LineArticleItem> LinesArticles { get; set; }
         public DbSet<LineItem> Lines { get; set; }
-        public DbSet<LocationItem> Locations { get; set; }
         public DbSet<MaterialItem> Materials { get; set; }
         public DbSet<MaterialArticleItem> MaterialsArticles { get; set; }
         public DbSet<OriginalItem> Originals { get; set; }
