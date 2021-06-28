@@ -19,18 +19,9 @@ namespace Shinsekai_API.Controllers
             _context = context;
         }
 
-        [Authorize]
         [HttpGet("read")]
         public IActionResult GetCarousels([FromQuery] string id)
         {
-            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
-            {
-                return Unauthorized(new ErrorResponse()
-                {
-                    Error = "You dont have the required role"
-                });
-            }
-
             var dbCarousel = _context.Carousels.ToList();
             if (id == null)
             {
