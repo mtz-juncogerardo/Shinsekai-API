@@ -61,6 +61,24 @@ namespace Shinsekai_API.Responses
             Quantity = quantity;
         }
 
+        public ArticleResponse(ArticleItem article, ShinsekaiApiContext context, bool justFirstImage)
+        {
+            if (justFirstImage)
+            {
+                Id = article.Id;
+                Name = article.Name;
+                Details = article.Details;
+                Height = article.Height;
+                Price = article.Price;
+                Images = GetImages(context, article.Id, true).ToList();
+                TimesSold = context.Sales.Count(s => s.ArticleId == article.Id);
+                Stock = article.Stock;
+                DateAdded = article.DateAdded;
+                DiscountPrice = article.DiscountPrice;
+                OriginalFlag = article.OriginalFlag;
+            }
+        }
+
         private static IEnumerable<Tag> GetAnimes(ShinsekaiApiContext context, string articleId)
         {
             return context.AnimesArticles.Join(context.Animes,
@@ -100,11 +118,18 @@ namespace Shinsekai_API.Responses
                 .Select(l => new Tag(l.Line));
         }
 
-        private static IEnumerable<Image> GetImages(ShinsekaiApiContext context, string articleId)
+        private static IEnumerable<Image> GetImages(ShinsekaiApiContext context, string articleId, bool justFirst = false)
         {
+            if (justFirst)
+            {
+                var image = new List<Image>();
+                var firstImage = context.Images.FirstOrDefault(i => i.ArticleId == articleId);
+                image.Add(new Image(firstImage));
+                return image;
+            }
             return context.Images.Where(i => i.ArticleId == articleId).Select(i => new Image(i));
         }
-        
+
         private static IEnumerable<Tag> GetBrands(ShinsekaiApiContext context, string brandId)
         {
             return context.Brands.Where(b => b.Id == brandId).Select(b => new Tag(b));
