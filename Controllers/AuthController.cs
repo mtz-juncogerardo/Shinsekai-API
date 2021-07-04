@@ -102,13 +102,14 @@ namespace Shinsekai_API.Controllers
             var dbUser = _context.Users.FirstOrDefault(r => r.Email == authParams.Email);
             if (dbUser == null)
             {
-                return NotFound(new
+                return NotFound(new ErrorResponse()
                 {
-                    Error = "Email does not match any known records"
+                    Error = "No hay ninguna cuenta asociada con el email proporcionado"
                 });
             }
             var jwt = new JsonWebTokenAuth(dbUser.Id, dbUser.Email, _configuration, true);
-            var recoverCredentials = new RecoverCredentialsMail(dbUser.Email, jwt.Token, _configuration);
+            var link = $"http://localhost:4200/recovery/{jwt.Token}";
+            var recoverCredentials = new RecoverCredentialsMail(dbUser.Email, link, _configuration);
             recoverCredentials.SendEmail();
             return Ok(new
             {

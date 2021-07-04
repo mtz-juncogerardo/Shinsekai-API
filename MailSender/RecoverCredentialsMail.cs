@@ -18,7 +18,8 @@ namespace Shinsekai_API.MailSender
 
         protected override string GetEmailTemplate()
         {
-            return $"<h1>Has solicitado un cambio de contraseña en Shinsekai Shop</h1> <p>Para poder cambiar tu contraseña por favor visita el siguiente link:</p> <a href=\"{_buttonLink}\" target=_blank>Click Aqui</a>";
+            return $"<h1>Has solicitado un cambio de contraseña en Shinsekai Shop</h1> <p>Para poder cambiar tu contraseña por favor visita el siguiente link:</p> <a href=\"{_buttonLink}\" target=_blank>Click Aqui</a> <br>" +
+                   $"<p>Si no puedes acceder al link, copia y pega el siguiente enlace en tu navegador:<p><br>{_buttonLink}";
         }
     }
 }
