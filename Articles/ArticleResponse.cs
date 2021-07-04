@@ -43,7 +43,7 @@ namespace Shinsekai_API.Responses
             Price = article.Price;
             Stock = article.Stock;
             DateAdded = article.DateAdded;
-            DiscountPrice = article.DiscountPrice;
+            DiscountPrice = article.DiscountPrice <= 0.1M ? 0 : article.DiscountPrice;
             OriginalFlag = article.OriginalFlag;
         }
 
@@ -56,7 +56,7 @@ namespace Shinsekai_API.Responses
             Price = article.Price;
             Stock = article.Stock;
             DateAdded = article.DateAdded;
-            DiscountPrice = article.DiscountPrice;
+            DiscountPrice = article.DiscountPrice <= 0.1M ? 0 : article.DiscountPrice;
             OriginalFlag = article.OriginalFlag;
             Quantity = quantity;
         }
@@ -74,7 +74,7 @@ namespace Shinsekai_API.Responses
                 TimesSold = context.Sales.Count(s => s.ArticleId == article.Id);
                 Stock = article.Stock;
                 DateAdded = article.DateAdded;
-                DiscountPrice = article.DiscountPrice;
+                DiscountPrice = article.DiscountPrice <= 0.1M ? 0 : article.DiscountPrice;
                 OriginalFlag = article.OriginalFlag;
             }
         }

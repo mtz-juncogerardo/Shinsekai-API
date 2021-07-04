@@ -67,19 +67,19 @@ namespace Shinsekai_API.Controllers
         public IActionResult GetFavorites()
         {
             var id = AuthService.IdentifyUser(User.Identity);
-            var dbFavorites = _context.Favorites.Join(_context.Users,
-                    f => f.UserId,
-                    u => u.Id,
-                    (f, u) => new
+            var dbFavArticles = _context.Articles.Join(_context.Favorites,
+                    a => a.Id,
+                    f => f.ArticleId,
+                    (a, f) => new
                     {
                         Favorites = f,
-                        User = u
-                    }).Where(fu => fu.User.Id == id)
-                .Select(fu => fu.Favorites);
+                        Article = a
+                    }).Where(fa => fa.Favorites.UserId == id)
+                .Select(fa => fa.Article);
 
             return Ok(new OkResponse()
             {
-                Response = dbFavorites
+                Response = dbFavArticles
             });
         }
 
@@ -144,6 +144,37 @@ namespace Shinsekai_API.Controllers
             {
                 Response = dbPurchases,
                 Count = dbPurchases.Count
+            });
+        }
+
+        [Authorize]
+        [HttpPost("favorites")]
+        public IActionResult SaveFavorite([FromBody] ArticleItem article)
+        {
+            var id = AuthService.IdentifyUser(User.Identity);
+            var dbFavorite = _context.Favorites.FirstOrDefault(f => f.ArticleId == article.Id && f.UserId == id);
+
+            if (dbFavorite != null)
+            {
+                return BadRequest(new ErrorResponse()
+                {
+                    Error = "La figura ya se encuentra en tus favoritos"
+                });
+            }
+
+            var favorite = new FavoriteItem()
+            {
+                ArticleId = article.Id,
+                UserId = id,
+                Id = Guid.NewGuid().ToString()
+            };
+
+            _context.Favorites.Add(favorite);
+            _context.SaveChanges();
+
+            return Ok(new OkResponse()
+            {
+                Response = favorite
             });
         }
 

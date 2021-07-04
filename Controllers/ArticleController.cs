@@ -16,7 +16,7 @@ namespace Shinsekai_API.Controllers
     public class ArticleController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
-        private const int _numberOfElementsInPage = 12;
+        private const int NumberOfElementsInPage = 12;
         private readonly IBlobService _blobService;
 
         public ArticleController(ShinsekaiApiContext context, IBlobService blobService)
@@ -35,7 +35,7 @@ namespace Shinsekai_API.Controllers
             bool orderBySales)
         {
             var pageNum = page == null ? 1 : int.Parse(page);
-            var elementsToSkip = (pageNum - 1) * _numberOfElementsInPage;
+            var elementsToSkip = (pageNum - 1) * NumberOfElementsInPage;
             var dbArticles = _context.Articles.ToList();
 
             if (brandId != null)
@@ -126,8 +126,8 @@ namespace Shinsekai_API.Controllers
             }
 
             var articleCount = dbArticles.Count;
-            var maxPages = (int)Math.Ceiling(articleCount / (decimal)_numberOfElementsInPage);
-            var articlesByPage = dbArticles.Skip(elementsToSkip).Take(_numberOfElementsInPage).ToList();
+            var maxPages = (int)Math.Ceiling(articleCount / (decimal)NumberOfElementsInPage);
+            var articlesByPage = dbArticles.Skip(elementsToSkip).Take(NumberOfElementsInPage).ToList();
             articlesByPage.ForEach(a => a.Brand = _context.Brands.FirstOrDefault(b => b.Id == a.BrandId));
             var responseArticles = articlesByPage.Select(article => new ArticleResponse(article, _context, true)).ToList();
 
@@ -314,6 +314,11 @@ namespace Shinsekai_API.Controllers
             article.MaterialsArticles = new List<MaterialArticleItem>();
             article.AnimesArticles = new List<AnimeArticleItem>();
 
+            if (article.DiscountPrice <= 0)
+            {
+                article.DiscountPrice = 0.1M;
+            }
+
             foreach (var line in article.Lines)
             {
                 var lineArticle = new LineArticleItem()
@@ -368,6 +373,7 @@ namespace Shinsekai_API.Controllers
 
             article.UpdateContext(_context);
             _context.SaveChanges();
+            article.DiscountPrice = article.DiscountPrice <= 0.1M ? 0 : article.DiscountPrice;
 
             return Ok(new OkResponse()
             {
@@ -433,13 +439,23 @@ namespace Shinsekai_API.Controllers
                 var dbArticle = _context.Articles.FirstOrDefault(a => a.Id == replicaId);
                 var dbOriginal = _context.Articles.FirstOrDefault(a => a.Id == dbArticle.OriginalSerial);
 
+                if (dbOriginal == null)
+                {
+                    return Ok(new OkResponse()
+                    {
+                        Response = null
+                    });
+                }
+                
+                var response = new ArticleResponse(dbOriginal);
                 return Ok(new OkResponse()
                 {
-                    Response = dbOriginal
+                    Response = response
                 });
             }
 
             var dbOriginals = _context.Articles.Where(r => r.OriginalFlag)
+                .Select(a => new ArticleResponse(a, 0)).AsEnumerable()
                 .OrderBy(r => r.Name).ToList();
 
             return Ok(new OkResponse()
@@ -454,14 +470,23 @@ namespace Shinsekai_API.Controllers
             if (originalId != null)
             {
                 var dbReplica = _context.Articles.FirstOrDefault(a => a.OriginalSerial == originalId);
+                if (dbReplica == null)
+                {
+                    return Ok(new OkResponse()
+                    {
+                        Response = null
+                    }); 
+                }
 
+                var response = new ArticleResponse(dbReplica);
                 return Ok(new OkResponse()
                 {
-                    Response = dbReplica
+                    Response = response
                 });
             }
 
             var dbReplicas = _context.Articles.Where(a => !a.OriginalFlag)
+                .Select(a => new ArticleResponse(a, 0)).AsEnumerable()
                 .OrderBy(a => a.Name);
 
             return Ok(new OkResponse()
