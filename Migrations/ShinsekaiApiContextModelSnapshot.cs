@@ -364,6 +364,12 @@ namespace Shinsekai_API.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
+                    b.Property<bool>("AppearsOnLeft")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AppearsOnRight")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ImagePath")
                         .IsRequired()
                         .HasMaxLength(100)

@@ -32,6 +32,7 @@ namespace Shinsekai_API.Controllers
             string brandId,
             string lineId,
             string materialId,
+            string type,
             bool orderBySales)
         {
             var pageNum = page == null ? 1 : int.Parse(page);
@@ -110,6 +111,18 @@ namespace Shinsekai_API.Controllers
                     .ToList();
             }
 
+            if (type != null)
+            {
+                if (type.ToLower() == "original" || type.ToLower() == "originals")
+                {
+                    dbArticles = dbArticles.Where(a => a.OriginalFlag).ToList();
+                }
+
+                if (type.ToLower() == "replica" || type.ToLower() == "replicas")
+                {
+                    dbArticles = dbArticles.Where(a => !a.OriginalFlag).ToList();
+                }
+            }
 
             if (orderBySales)
             {
