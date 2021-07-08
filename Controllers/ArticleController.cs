@@ -33,7 +33,8 @@ namespace Shinsekai_API.Controllers
             string lineId,
             string materialId,
             string type,
-            bool orderBySales)
+            bool orderBySales,
+            bool promotions)
         {
             var pageNum = page == null ? 1 : int.Parse(page);
             var elementsToSkip = (pageNum - 1) * NumberOfElementsInPage;
@@ -124,6 +125,11 @@ namespace Shinsekai_API.Controllers
                 }
             }
 
+            if (promotions)
+            {
+                dbArticles = dbArticles.Where(a => a.DiscountPrice > 1).ToList();
+            }
+
             if (orderBySales)
             {
                 dbArticles = dbArticles.Select(a => new
@@ -137,7 +143,7 @@ namespace Shinsekai_API.Controllers
             {
                 dbArticles = dbArticles.OrderByDescending(a => a.DateAdded).ToList();
             }
-
+            
             var articleCount = dbArticles.Count;
             var maxPages = (int)Math.Ceiling(articleCount / (decimal)NumberOfElementsInPage);
             var articlesByPage = dbArticles.Skip(elementsToSkip).Take(NumberOfElementsInPage).ToList();
@@ -147,7 +153,7 @@ namespace Shinsekai_API.Controllers
             return Ok(new OkResponse()
             {
                 Response = responseArticles,
-                Count = responseArticles.Count(),
+                Count = articleCount,
                 Page = pageNum,
                 MaxPage = maxPages
             });

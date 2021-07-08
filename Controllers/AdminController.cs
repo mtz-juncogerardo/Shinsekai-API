@@ -20,18 +20,9 @@ namespace Shinsekai_API.Controllers
             _context = context;
         }
 
-        [Authorize]
         [HttpGet("questions/read")]
         public IActionResult GetQuestions([FromQuery] string id)
         {
-            if (AuthService.AuthorizeAdmin(User.Identity, _context.Users.ToList()))
-            {
-                return Unauthorized(new ErrorResponse()
-                {
-                    Error = "You dont have the required role"
-                });
-            }
-
             var dbQuestion = _context.Questions.ToList();
             if (id == null)
             {

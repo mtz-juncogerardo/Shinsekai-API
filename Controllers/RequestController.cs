@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,16 @@ namespace Shinsekai_API.Controllers
         [HttpPost]
         public IActionResult SendEmailRequest([FromBody] ContactRequest req)
         {
+            var dbRequest = _context.Requests.FirstOrDefault(r => r.Id == req.PurchaseId);
+
+            if (dbRequest != null)
+            {
+                return BadRequest(new ErrorResponse() 
+                {
+                    Error = "Ya hay una solicitud abierta para esta compra, El equipo de Shinsekai pronto se pondra en contacto contigo"
+                });
+            }
+            
             var dbPurchase = _context.Purchases.FirstOrDefault(p => p.Id == req.PurchaseId);
 
             if (dbPurchase == null)
@@ -35,6 +46,16 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
+            var request = new RequestItem()
+            {
+                Id = Guid.NewGuid().ToString(),
+                Details = req.Message,
+                Email = req.Email ?? req.Name,
+                PurchaseId = req.PurchaseId
+            };
+            
+            _context.Requests.Add(request);
+            _context.SaveChanges();
             var contactEmail = new UserRequestMail(req.Email, req.Name, req.PurchaseId, req.Message, req.Email, _configuration);
             contactEmail.SendEmail();
             
