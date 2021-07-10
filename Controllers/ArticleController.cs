@@ -202,6 +202,7 @@ namespace Shinsekai_API.Controllers
                 {
                     Id = image.Id,
                     Path = image.Path,
+                    Order = image.Order,
                     ArticleId = article.Id
                 };
                 _context.Images.Add(imageItem);
@@ -383,6 +384,7 @@ namespace Shinsekai_API.Controllers
                     var imageItem = new ImageItem()
                     {
                         Id = image.Id,
+                        Order = image.Order,
                         ArticleId = article.Id,
                         Path = image.Path
                     };

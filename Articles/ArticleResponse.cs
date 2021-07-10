@@ -123,11 +123,15 @@ namespace Shinsekai_API.Responses
             if (justFirst)
             {
                 var image = new List<Image>();
-                var firstImage = context.Images.FirstOrDefault(i => i.ArticleId == articleId);
+                var firstImage = context.Images.Where(i => i.ArticleId == articleId)
+                    .OrderBy(r => r.Order)
+                    .First();
                 image.Add(new Image(firstImage));
                 return image;
             }
-            return context.Images.Where(i => i.ArticleId == articleId).Select(i => new Image(i));
+            return context.Images.Where(i => i.ArticleId == articleId)
+                .OrderBy(r => r.Order)
+                .Select(i => new Image(i));
         }
 
         private static IEnumerable<Tag> GetBrands(ShinsekaiApiContext context, string brandId)

@@ -21,7 +21,8 @@ namespace Shinsekai_API.MailSender
 
         protected override string GetEmailTemplate()
         {
-            return $"<h1>Gracias por registrarte en Shinsekai Shop</h1> <p>Para terminar tu registro por favor haz click en el siguiente enlace.</p> <a href=\"{_buttonLink}\" target=_blank>Click Aquí</a>";
+            return $"<h1>Gracias por registrarte en Shinsekai Shop</h1> <p>Para terminar tu registro por favor haz click en el siguiente enlace.</p> <a href=\"{_buttonLink}\" target=_blank>Click Aquí</a> <br>" +
+                   $"<p>Si no puedes acceder al link, copia y pega el siguiente enlace en tu navegador:<p><br>{_buttonLink}";
         }
     }
 }

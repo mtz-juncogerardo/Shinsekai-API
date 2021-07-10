@@ -4,6 +4,7 @@
     <attachedFolders />
     <explicitIncludes>
       <Path>appsettings.Development.json</Path>
+      <Path>appsettings.json</Path>
     </explicitIncludes>
     <explicitExcludes />
   </component>

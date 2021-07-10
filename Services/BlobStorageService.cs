@@ -11,7 +11,7 @@ namespace Shinsekai_API.Services
     {
         private readonly BlobContainerClient _containerClient;
         private readonly string _path;
-        private const string MainPath = "https://shinsekai.blob.core.windows.net/";
+        private const string MainPath = "https://shinsekaistorage.blob.core.windows.net/";
 
         public BlobStorageService(BlobServiceClient blobServiceClient, string containerId = "shinsekai-storage")
         {

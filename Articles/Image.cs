@@ -4,6 +4,7 @@ namespace Shinsekai_API.Responses
     {
         public string Id { get; set; }
         public string Path { get; set; }
+        public long Order { get; set; }
 
         public Image()
         {
@@ -13,6 +14,7 @@ namespace Shinsekai_API.Responses
         {
             Id = image.Id;
             Path = image.Path;
+            Order = image.Order;
         }
     }
 
@@ -20,5 +22,6 @@ namespace Shinsekai_API.Responses
     {
         public string Id { get; set; }
         public string Path { get; set; } 
+        public long Order { get; set; }
     }
 }

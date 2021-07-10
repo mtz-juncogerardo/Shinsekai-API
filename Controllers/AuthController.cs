@@ -108,7 +108,7 @@ namespace Shinsekai_API.Controllers
                 });
             }
             var jwt = new JsonWebTokenAuth(dbUser.Id, dbUser.Email, _configuration, true);
-            var link = $"http://localhost:4200/recovery/{jwt.Token}";
+            var link = $"http://20.65.160.85/recovery/{jwt.Token}";
             var recoverCredentials = new RecoverCredentialsMail(dbUser.Email, link, _configuration);
             recoverCredentials.SendEmail();
             return Ok(new
@@ -144,7 +144,7 @@ namespace Shinsekai_API.Controllers
             var jwt = new JsonWebTokenAuth(dbUser.Id,
                 dbUser.Email,
                 passwordService.HashPassword, passwordService.Salt, _configuration);
-            var link = $"http://localhost:4200/register?token={jwt.Token}";
+            var link = $"http://20.65.160.85/register?token={jwt.Token}";
             var emailValidation = new EmailValidationMail(dbUser.Email, link, _configuration);
             emailValidation.SendEmail();
 
