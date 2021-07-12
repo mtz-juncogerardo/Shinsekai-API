@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shinsekai_API.Models;
 
 namespace Shinsekai_API.Migrations
 {
     [DbContext(typeof(ShinsekaiApiContext))]
-    partial class ShinsekaiApiContextModelSnapshot : ModelSnapshot
+    [Migration("20210706015003_ShinsekaiMigration_v9")]
+    partial class ShinsekaiMigration_v9
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -150,8 +152,8 @@ namespace Shinsekai_API.Migrations
 
                     b.Property<string>("ImagePath")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("RedirectPath")
                         .HasMaxLength(100)
@@ -221,13 +223,10 @@ namespace Shinsekai_API.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
-                    b.Property<long>("Order")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("Path")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -375,8 +374,8 @@ namespace Shinsekai_API.Migrations
 
                     b.Property<string>("ImagePath")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("RedirectPath")
                         .HasMaxLength(100)
@@ -394,6 +393,7 @@ namespace Shinsekai_API.Migrations
                         .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ArticleId")
+                        .IsRequired()
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
@@ -701,7 +701,9 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
                         .WithMany("PurchasesArticles")
-                        .HasForeignKey("ArticleId");
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Shinsekai_API.Models.PurchaseItem", "Purchase")
                         .WithMany("PurchasesArticles")

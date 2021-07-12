@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shinsekai_API.Models;
 
 namespace Shinsekai_API.Migrations
 {
     [DbContext(typeof(ShinsekaiApiContext))]
-    partial class ShinsekaiApiContextModelSnapshot : ModelSnapshot
+    [Migration("20210615234542_ShinsekaiMigration_v5")]
+    partial class ShinsekaiMigration_v5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -150,8 +152,8 @@ namespace Shinsekai_API.Migrations
 
                     b.Property<string>("ImagePath")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("RedirectPath")
                         .HasMaxLength(100)
@@ -171,10 +173,10 @@ namespace Shinsekai_API.Migrations
                     b.Property<int>("EstimatedDays")
                         .HasColumnType("int");
 
-                    b.Property<string>("Location")
+                    b.Property<string>("LocationId")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("Parcel")
                         .IsRequired()
@@ -182,6 +184,9 @@ namespace Shinsekai_API.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LocationId")
+                        .IsUnique();
 
                     b.ToTable("Deliveries");
                 });
@@ -221,13 +226,10 @@ namespace Shinsekai_API.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
-                    b.Property<long>("Order")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("Path")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -275,6 +277,22 @@ namespace Shinsekai_API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Lines");
+                });
+
+            modelBuilder.Entity("Shinsekai_API.Models.LocationItem", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Locations");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.MaterialArticleItem", b =>
@@ -367,16 +385,10 @@ namespace Shinsekai_API.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
-                    b.Property<bool>("AppearsOnLeft")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("AppearsOnRight")
-                        .HasColumnType("bit");
-
                     b.Property<string>("ImagePath")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("RedirectPath")
                         .HasMaxLength(100)
@@ -394,6 +406,7 @@ namespace Shinsekai_API.Migrations
                         .HasColumnType("nvarchar(36)");
 
                     b.Property<string>("ArticleId")
+                        .IsRequired()
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
@@ -609,6 +622,17 @@ namespace Shinsekai_API.Migrations
                     b.Navigation("Brand");
                 });
 
+            modelBuilder.Entity("Shinsekai_API.Models.DeliveryItem", b =>
+                {
+                    b.HasOne("Shinsekai_API.Models.LocationItem", "Location")
+                        .WithOne("Delivery")
+                        .HasForeignKey("Shinsekai_API.Models.DeliveryItem", "LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Location");
+                });
+
             modelBuilder.Entity("Shinsekai_API.Models.FavoriteItem", b =>
                 {
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
@@ -701,7 +725,9 @@ namespace Shinsekai_API.Migrations
                 {
                     b.HasOne("Shinsekai_API.Models.ArticleItem", "Article")
                         .WithMany("PurchasesArticles")
-                        .HasForeignKey("ArticleId");
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Shinsekai_API.Models.PurchaseItem", "Purchase")
                         .WithMany("PurchasesArticles")
@@ -810,6 +836,11 @@ namespace Shinsekai_API.Migrations
             modelBuilder.Entity("Shinsekai_API.Models.LineItem", b =>
                 {
                     b.Navigation("LinesArticles");
+                });
+
+            modelBuilder.Entity("Shinsekai_API.Models.LocationItem", b =>
+                {
+                    b.Navigation("Delivery");
                 });
 
             modelBuilder.Entity("Shinsekai_API.Models.MaterialItem", b =>

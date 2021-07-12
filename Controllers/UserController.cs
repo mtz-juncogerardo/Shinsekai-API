@@ -29,7 +29,7 @@ namespace Shinsekai_API.Controllers
             var dbUser = _context.Users.FirstOrDefault(u => u.Id == id);
             if (dbUser == null)
             {
-                return BadRequest(new
+                return Ok(new ErrorResponse()
                 {
                     Error = "Something went wrong"
                 });
@@ -175,6 +175,44 @@ namespace Shinsekai_API.Controllers
             return Ok(new OkResponse()
             {
                 Response = favorite
+            });
+        }
+
+        [Authorize]
+        [HttpPut]
+        public IActionResult SaveFavorite([FromBody] UserItem user)
+        {
+            var id = AuthService.IdentifyUser(User.Identity);
+            var dbUser = _context.Users.FirstOrDefault(u => u.Id == id);
+
+            if (dbUser == null)
+            {
+                return BadRequest(new ErrorResponse() 
+                {
+                    Error = "El usuario no existe"
+                });
+            }
+
+            if (user.Email == null)
+            {
+                return BadRequest(new ErrorResponse() 
+                {
+                    Error = "Debes especificar un email"
+                });
+            }
+            
+            dbUser.Address = user.Address;
+            dbUser.City = user.City;
+            dbUser.PostalCode = user.PostalCode;
+            dbUser.Email = user.Email;
+            dbUser.Name = user.Name;
+            dbUser.Phone = user.Phone;
+
+            _context.SaveChanges();
+
+            return Ok(new OkResponse()
+            {
+                Response = dbUser
             });
         }
 

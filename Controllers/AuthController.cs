@@ -36,7 +36,7 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            return Ok(new OkResponse() 
+            return Ok(new OkResponse()
             {
                 Response = "Authorized"
             });
@@ -46,14 +46,16 @@ namespace Shinsekai_API.Controllers
         [HttpPost("authorize")]
         public IActionResult AuthorizeUser(UserItem user)
         {
-            if (user.Address == null || user.City == null || user.Name == null || user.Phone == null)
+            if (user.Address == null || user.City == null || user.Name == null || user.Phone == null || user.PostalCode == null || user.Email == null)
             {
                 return BadRequest(new ErrorResponse()
                 {
-                    Error = "You must specify an Adress, a City, a Name and a Phone so we can authorize to buy"
+                    Error = "You must specify an Adress, a City, a Name, an email and a Phone so we can authorize to buy"
                 });
             }
-            var jwt = new JsonWebTokenAuth(user.Id, user.Email, _configuration, true);
+
+            user.Id = Guid.NewGuid().ToString();
+            var jwt = new JsonWebTokenAuth(user, _configuration, true);
 
             return Ok(new OkResponse()
             {
@@ -129,7 +131,7 @@ namespace Shinsekai_API.Controllers
                 });
             }
             var dbUser = _context.Users.FirstOrDefault(r => r.Email == authParams.Email);
-            if (dbUser != null)
+            if (dbUser != null && dbUser.AuthParamsId != null)
             {
                 return BadRequest(new
                 {
@@ -138,7 +140,7 @@ namespace Shinsekai_API.Controllers
             }
             dbUser = new UserItem()
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = dbUser != null ? dbUser.Id : Guid.NewGuid().ToString(),
                 Email = authParams.Email
             };
             var jwt = new JsonWebTokenAuth(dbUser.Id,
@@ -169,8 +171,8 @@ namespace Shinsekai_API.Controllers
             var salt = userClaim.Claims.Where(r => r.Type == ClaimTypes.Authentication)
                 .Select(c => c.Value)
                 .First();
-            var dbUser = _context.Users.FirstOrDefault(r => r.Email == email);
-            if (dbUser != null)
+            var dbUser = _context.Users.FirstOrDefault(u => u.Email == email);
+            if (dbUser != null && dbUser.AuthParamsId != null)
             {
                 var auth = new JsonWebTokenAuth(dbUser.Id, dbUser.Email, _configuration);
                 return Ok(new
@@ -191,15 +193,24 @@ namespace Shinsekai_API.Controllers
                 Salt = salt,
                 Password = password
             };
-            dbUser = new UserItem()
-            {
-                Id = id,
-                Email = email,
-                AuthParams = authParams,
-            };
-            _context.Users.Add(dbUser);
-            _context.SaveChanges();
 
+            if (dbUser != null)
+            {
+                dbUser.AuthParams = authParams;
+                _context.Update(dbUser);
+            }
+            else
+            {
+                dbUser = new UserItem()
+                {
+                    Id = id,
+                    Email = email,
+                    AuthParams = authParams,
+                };
+                _context.Users.Add(dbUser);
+            }
+
+            _context.SaveChanges();
             var jwt = new JsonWebTokenAuth(dbUser.Id, dbUser.Email, _configuration);
 
             return Ok(new

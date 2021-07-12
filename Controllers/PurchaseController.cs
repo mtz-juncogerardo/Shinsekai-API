@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Shinsekai_API.Authentication;
+using Shinsekai_API.Config;
 using Shinsekai_API.MailSender;
 using Shinsekai_API.Models;
 using Shinsekai_API.Requests;
 using Shinsekai_API.Responses;
 using Shinsekai_API.Services;
+using Stripe;
 using Stripe.Checkout;
 
 namespace Shinsekai_API.Controllers
@@ -26,6 +28,7 @@ namespace Shinsekai_API.Controllers
         {
             _context = context;
             _configuration = configuration;
+            StripeConfiguration.ApiKey = new ApiConfiguration(configuration).StripeKey;
         }
 
         [Authorize]
@@ -71,8 +74,8 @@ namespace Shinsekai_API.Controllers
             foreach (var purchase in dbPurchases)
             {
                 var articles = purchase.Select(r => new ArticleResponse(
-                                                                    r.PurchaseArticleArticlePurchase.PurchaseArticleArticle.Article,
-                                                                    r.PurchaseArticleArticlePurchase.PurchaseArticleArticle.PurchaseArticle.Quantity));
+                    r.PurchaseArticleArticlePurchase.PurchaseArticleArticle.Article,
+                    r.PurchaseArticleArticlePurchase.PurchaseArticleArticle.PurchaseArticle.Quantity));
 
                 response.Add(new PurchaseResponse()
                 {
@@ -121,13 +124,16 @@ namespace Shinsekai_API.Controllers
                 CancelUrl = paymentService.ErrorUrl
             };
             var service = new SessionService();
-            var session = service.Create(options);
+            Session session = service.Create(options);
+            var response = service.Get(session.Id);
             return Ok(new OkResponse()
             {
                 Response = new
                 {
-                    session.Id,
-                    payment.PayWithPoints,
+                    SessionUrl = response.Url,
+                    Id = response.Id,
+                    Articles = payment.Articles,
+                    PayWithPoints = payment.PayWithPoints,
                     CashPoints = paymentService.GetCashPoints(),
                     TotalPrice = paymentService.GetTotal()
                 }
@@ -139,6 +145,7 @@ namespace Shinsekai_API.Controllers
         public IActionResult SavePurchase([FromBody] PurchaseItem purchase)
         {
             var id = AuthService.IdentifyUser(User.Identity);
+            var anonBuyer = false;
             var purchasesArticles = purchase.PurchasesArticles;
             if (!purchasesArticles.Any())
             {
@@ -148,40 +155,56 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
-            var buyer = _context.Users.FirstOrDefault(u => u.Id == purchase.Id);
+            var buyer = _context.Users.FirstOrDefault(u => u.Id == id);
 
             if (buyer == null)
             {
+                anonBuyer = true;
                 var userClaim = (ClaimsIdentity)User.Identity ?? new ClaimsIdentity();
                 buyer = new UserItem()
                 {
                     Id = id,
-                    Address = userClaim.Claims.Where(r => r.Type == ClaimTypes.Email)
+                    Address = userClaim.Claims.Where(r => r.Type == ClaimTypes.Locality)
                         .Select(c => c.Value)
                         .First(),
-                    City = userClaim.Claims.Where(r => r.Type == ClaimTypes.Email)
+                    City = userClaim.Claims.Where(r => r.Type == ClaimTypes.Country)
                         .Select(c => c.Value)
                         .First(),
                     Email = userClaim.Claims.Where(r => r.Type == ClaimTypes.Email)
                         .Select(c => c.Value)
                         .First(),
-                    Phone = userClaim.Claims.Where(r => r.Type == ClaimTypes.Email)
+                    Phone = userClaim.Claims.Where(r => r.Type == ClaimTypes.HomePhone)
+                        .Select(c => c.Value)
+                        .First(),
+                    PostalCode = userClaim.Claims.Where(r => r.Type == ClaimTypes.PostalCode)
+                        .Select(c => c.Value)
+                        .First(),
+                    Name = userClaim.Claims.Where(r => r.Type == ClaimTypes.Name)
                         .Select(c => c.Value)
                         .First(),
                 };
 
-                _context.Users.Add(buyer);
+                var registered = _context.Users.FirstOrDefault(u => u.Email == buyer.Email);
+
+                if (registered == null)
+                {
+                    _context.Users.Add(buyer);
+                }
+                else
+                {
+                    buyer.Id = registered.Id;
+                }
             }
-            else if (buyer.Address == null || buyer.City == null || buyer.Name == null || buyer.Phone == null)
+            else if (buyer.Address == null || buyer.City == null || buyer.Name == null || buyer.Phone == null || buyer.PostalCode == null)
             {
                 return BadRequest(new ErrorResponse()
                 {
-                    Error = "Se debe especificar una dirección, una ciudad, un nombre y un telefono para autorizar la compra."
+                    Error = "Se debe especificar una dirección, una ciudad, un codigo postal, un nombre y un telefono para autorizar la compra."
                 });
             }
 
             purchase.Id = Guid.NewGuid().ToString();
-            purchase.UserId = id;
+            purchase.UserId = buyer.Id;
             purchase.Date = DateTime.Now;
             purchase.PurchasesArticles = new List<PurchaseArticleItem>();
 
@@ -227,7 +250,12 @@ namespace Shinsekai_API.Controllers
                 _context.Articles.Update(dbArticle);
             }
 
-            purchase.Total = purchase.PurchasesArticles.Sum(p => (p.Article.Price - p.Article.DiscountPrice) * p.Quantity);
+            purchase.Total = purchase.PurchasesArticles.Select(p => new
+            {
+                Price = p.Article.Price,
+                DiscountPrice = p.Article.DiscountPrice <= 0.1M ? 0 : p.Article.DiscountPrice,
+                Quantity = p.Quantity
+            }).Sum(r => (r.Price - r.DiscountPrice) * r.Quantity);
 
             if (purchase.CashPoints > 0)
             {
@@ -254,16 +282,19 @@ namespace Shinsekai_API.Controllers
                 }
             }
 
-            var pointItem = new PointItem()
+            if (!anonBuyer)
             {
-                ExpirationDate = DateTime.Now.AddYears(1),
-                UserId = id,
-                Amount = purchase.Total / 100,
-                Id = Guid.NewGuid().ToString()
-            };
+                var pointItem = new PointItem()
+                {
+                    ExpirationDate = DateTime.Now.AddYears(1),
+                    UserId = id,
+                    Amount = purchase.Total / 100,
+                    Id = Guid.NewGuid().ToString()
+                };
+                _context.Points.Add(pointItem);
+            }
 
             _context.Purchases.Add(purchase);
-            _context.Points.Add(pointItem);
             _context.SaveChanges();
 
             var emailService = new PurchaseConfirmationMail(buyer.Email, purchase.Id, _configuration);
@@ -271,7 +302,26 @@ namespace Shinsekai_API.Controllers
 
             return Ok(new OkResponse()
             {
-                Response = "Purchase has been saved, An email was sent to the buyer"
+                Response = new
+                {
+                    Id = purchase.Id,
+                    Name = buyer.Name,
+                    Address = buyer.Address,
+                    PostalCode = buyer.PostalCode,
+                    City = buyer.City
+                }
+            });
+        }
+
+        [HttpGet("validate")]
+        public IActionResult GetPaymentValidation([FromQuery] string paymentId)
+        {
+            var service = new SessionService();
+            var response = service.Get(paymentId);
+
+            return Ok(new OkResponse()
+            {
+                Response = response
             });
         }
     }

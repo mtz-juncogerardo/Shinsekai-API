@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using Shinsekai_API.Models;
 using Shinsekai_API.Requests;
 using Stripe.Checkout;
 
@@ -42,12 +44,12 @@ namespace Shinsekai_API.Services
             {
                 PriceData = new SessionLineItemPriceDataOptions
                 {
-                    UnitAmount = Convert.ToInt64(article.Price - article.DiscountPrice),
+                    UnitAmountDecimal = (article.Price - article.DiscountPrice) * 100,
                     Currency = Currency,
                     ProductData = new SessionLineItemPriceDataProductDataOptions
                     {
-                        Name = article.Name,
-                    },
+                        Name = article.Name
+                    }
                 },
                 Quantity = article.Quantity
             }).ToList();
