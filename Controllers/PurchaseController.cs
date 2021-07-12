@@ -67,7 +67,7 @@ namespace Shinsekai_API.Controllers
                         PurchaseArticleArticlePurchase = paap,
                         User = u
                     }).Select(paapu => paapu)
-                .OrderBy(p => p.PurchaseArticleArticlePurchase.Purchase.Date)
+                .OrderByDescending(p => p.PurchaseArticleArticlePurchase.Purchase.Date)
                 .AsEnumerable()
                 .GroupBy(p => p.PurchaseArticleArticlePurchase.Purchase.Id);
 
@@ -299,6 +299,8 @@ namespace Shinsekai_API.Controllers
 
             var emailService = new PurchaseConfirmationMail(buyer.Email, purchase.Id, _configuration);
             emailService.SendEmail();
+            var emailRequest = new PurchaseRequestMail(purchase, _configuration);
+            emailRequest.SendEmail();
 
             return Ok(new OkResponse()
             {
