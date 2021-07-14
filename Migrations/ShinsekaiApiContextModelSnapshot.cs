@@ -419,8 +419,8 @@ namespace Shinsekai_API.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("nvarchar(36)");
 
-                    b.Property<int>("CashPoints")
-                        .HasColumnType("int");
+                    b.Property<decimal>("CashPoints")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");

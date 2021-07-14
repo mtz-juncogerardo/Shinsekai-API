@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Net;
-using System.Net.Mail;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 using Shinsekai_API.Config;
 
 namespace Shinsekai_API.MailSender
@@ -19,29 +20,15 @@ namespace Shinsekai_API.MailSender
             _configuration = new ApiConfiguration(configuration);
         }
 
-        public void SendEmail()
+        public async Task SendEmail()
         {
-            var message = new MailMessage(_configuration.MailServiceEmail, _receiverEmail)
-            {
-                Subject = _subject,
-                Body = GetEmailTemplate(),
-                IsBodyHtml = true
-            };
-            var client = new SmtpClient("smtp-mail.outlook.com")
-            {
-                Credentials = new NetworkCredential(_configuration.MailServiceEmail, _configuration.MailServicePassword),
-                Port = 587,
-                EnableSsl = true
-            };
-            try
-            {
-                client.Send(message);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error: {0}",
-                            ex);
-            }
+            var client = new SendGridClient(_configuration.SendGridApiKey);
+            var from = new EmailAddress(_configuration.MailServiceEmail, "Shinsekai Team");
+            var subject = _subject;
+            var to = new EmailAddress(_receiverEmail);
+            var htmlContent = GetEmailTemplate();
+            var msg = MailHelper.CreateSingleEmail(from, to, subject, "", htmlContent);
+            var response = await client.SendEmailAsync(msg);
         }
 
         protected abstract string GetEmailTemplate();

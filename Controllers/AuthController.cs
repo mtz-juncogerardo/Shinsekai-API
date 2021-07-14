@@ -110,7 +110,7 @@ namespace Shinsekai_API.Controllers
                 });
             }
             var jwt = new JsonWebTokenAuth(dbUser.Id, dbUser.Email, _configuration, true);
-            var link = $"http://20.65.160.85/recovery/{jwt.Token}";
+            var link = $"https://shinsekai.mx/recovery/{jwt.Token}";
             var recoverCredentials = new RecoverCredentialsMail(dbUser.Email, link, _configuration);
             recoverCredentials.SendEmail();
             return Ok(new
@@ -146,9 +146,20 @@ namespace Shinsekai_API.Controllers
             var jwt = new JsonWebTokenAuth(dbUser.Id,
                 dbUser.Email,
                 passwordService.HashPassword, passwordService.Salt, _configuration);
-            var link = $"http://20.65.160.85/register?token={jwt.Token}";
+            var link = $"https://shinsekai.mx/register?token={jwt.Token}";
             var emailValidation = new EmailValidationMail(dbUser.Email, link, _configuration);
-            emailValidation.SendEmail();
+
+            try
+            {
+                emailValidation.SendEmail();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new ErrorResponse()
+                {
+                    Error = e.Message
+                });
+            }
 
             return Ok(new
             {

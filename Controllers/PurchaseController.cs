@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -87,6 +88,15 @@ namespace Shinsekai_API.Controllers
                 });
             }
 
+            if (id != null)
+            {
+                var purchaseResponse = response.FirstOrDefault(r => r.Id == id);
+                return Ok(new OkResponse()
+                {
+                    Response = purchaseResponse
+                });
+            }
+
             return Ok(new OkResponse()
             {
                 Response = response
@@ -105,7 +115,7 @@ namespace Shinsekai_API.Controllers
                 var points = _context.Points.Where(p => p.UserId == id && p.ExpirationDate > DateTime.Now)
                     .ToList();
 
-                paymentService = new PaymentService(payment, (int)points.Sum(p => p.Amount));
+                paymentService = new PaymentService(payment, points.Sum(p => p.Amount));
             }
             else
             {
@@ -133,7 +143,6 @@ namespace Shinsekai_API.Controllers
                     SessionUrl = response.Url,
                     Id = response.Id,
                     Articles = payment.Articles,
-                    PayWithPoints = payment.PayWithPoints,
                     CashPoints = paymentService.GetCashPoints(),
                     TotalPrice = paymentService.GetTotal()
                 }
@@ -142,7 +151,7 @@ namespace Shinsekai_API.Controllers
 
         [Authorize]
         [HttpPost("create")]
-        public IActionResult SavePurchase([FromBody] PurchaseItem purchase)
+        public async Task<IActionResult> SavePurchase([FromBody] PurchaseItem purchase)
         {
             var id = AuthService.IdentifyUser(User.Identity);
             var anonBuyer = false;
@@ -250,35 +259,50 @@ namespace Shinsekai_API.Controllers
                 _context.Articles.Update(dbArticle);
             }
 
-            purchase.Total = purchase.PurchasesArticles.Select(p => new
+            var simplePurchase = purchase.PurchasesArticles.Select(p => new
             {
                 Price = p.Article.Price,
                 DiscountPrice = p.Article.DiscountPrice <= 0.1M ? 0 : p.Article.DiscountPrice,
                 Quantity = p.Quantity
-            }).Sum(r => (r.Price - r.DiscountPrice) * r.Quantity);
+            }).ToList();
+
+            purchase.Total = simplePurchase.Sum(r => (r.Price - r.DiscountPrice) * r.Quantity);
 
             if (purchase.CashPoints > 0)
             {
-                var remainingPoints = purchase.CashPoints;
+                // var totalPrice = simplePurchase.Sum(a => (a.Price - a.DiscountPrice) * a.Quantity);
+                // var totalQuantity = simplePurchase.Sum(a => a.Quantity);
+                // var totalWithDiscount = totalPrice - purchase.CashPoints;
+                // var cashPoints = totalWithDiscount < 0 ? totalWithDiscount : 0;
+                //
+                // purchase.Total = 0;
+                // foreach (var article in purchase.PurchasesArticles)
+                // {
+                //     purchase.Total += cashPoints == 0 ? totalWithDiscount / totalQuantity : decimal.Zero;
+                // }
+
+                var remainingPoints = (purchase.CashPoints - purchase.Total);
+                purchase.Total -= purchase.CashPoints;
+
                 var dbPoints = _context.Points.Where(p => p.UserId == id && p.ExpirationDate > DateTime.Now)
                     .OrderBy(p => p.ExpirationDate)
                     .ToList();
 
                 foreach (var point in dbPoints)
                 {
-                    if (remainingPoints == 0) break;
-                    var total = (int)point.Amount - purchase.CashPoints;
+                    _context.Points.Remove(point);
+                }
 
-                    point.Amount = total < 0 ? decimal.Zero : total;
-                    remainingPoints = total >= 0 ? 0 : Math.Abs(total);
-
-                    if (point.Amount == 0)
+                if (remainingPoints > 0)
+                {
+                    var pointItem = new PointItem()
                     {
-                        _context.Points.Remove(point);
-                        break;
-                    }
-
-                    _context.Points.Update(point);
+                        ExpirationDate = dbPoints.First().ExpirationDate,
+                        UserId = id,
+                        Amount = remainingPoints,
+                        Id = Guid.NewGuid().ToString()
+                    };
+                    _context.Points.Add(pointItem);
                 }
             }
 
@@ -298,9 +322,9 @@ namespace Shinsekai_API.Controllers
             _context.SaveChanges();
 
             var emailService = new PurchaseConfirmationMail(buyer.Email, purchase.Id, _configuration);
-            emailService.SendEmail();
+            await emailService.SendEmail();
             var emailRequest = new PurchaseRequestMail(purchase, _configuration);
-            emailRequest.SendEmail();
+            await emailRequest.SendEmail();
 
             return Ok(new OkResponse()
             {
@@ -310,7 +334,8 @@ namespace Shinsekai_API.Controllers
                     Name = buyer.Name,
                     Address = buyer.Address,
                     PostalCode = buyer.PostalCode,
-                    City = buyer.City
+                    City = buyer.City,
+                    TotalAmount = purchase.Total
                 }
             });
         }

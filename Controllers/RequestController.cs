@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +12,7 @@ using Shinsekai_API.Responses;
 namespace Shinsekai_API.Controllers
 {
     [ApiController]
-    [Route("request")]
+    [Route("api/request")]
     public class RequestController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
@@ -24,9 +25,9 @@ namespace Shinsekai_API.Controllers
         }
 
         [HttpPost]
-        public IActionResult SendEmailRequest([FromBody] ContactRequest req)
+        public async Task<IActionResult> SendEmailRequest([FromBody] ContactRequest req)
         {
-            var dbRequest = _context.Requests.FirstOrDefault(r => r.Id == req.PurchaseId);
+            var dbRequest = _context.Requests.FirstOrDefault(r => r.PurchaseId == req.PurchaseId);
 
             if (dbRequest != null)
             {
@@ -56,8 +57,8 @@ namespace Shinsekai_API.Controllers
             
             _context.Requests.Add(request);
             _context.SaveChanges();
-            var contactEmail = new UserRequestMail(req.Email, req.Name, req.PurchaseId, req.Message, req.Email, _configuration);
-            contactEmail.SendEmail();
+            var contactEmail = new UserRequestMail( "shinsekai.ml@hotmail.com", req.Name, req.PurchaseId, req.Message, req.Email, _configuration);
+            await contactEmail.SendEmail();
             
             return Ok(new OkResponse()
             {

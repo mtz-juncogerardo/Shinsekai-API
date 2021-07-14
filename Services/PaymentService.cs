@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Shinsekai_API.Models;
 using Shinsekai_API.Requests;
 using Stripe.Checkout;
@@ -11,7 +12,8 @@ namespace Shinsekai_API.Services
     public class PaymentService : PaymentRequest
     {
         private const string Currency = "mxn";
-        private readonly int _cashPoints;
+        private decimal _cashPoints;
+        private bool _disccountApplied;
 
         public PaymentService(PaymentRequest payment)
         {
@@ -21,14 +23,14 @@ namespace Shinsekai_API.Services
             _cashPoints = 0;
         }
 
-        public PaymentService(PaymentRequest payment, int cashPoints)
+        public PaymentService(PaymentRequest payment, decimal cashPoints)
             : this(payment)
         {
             _cashPoints = cashPoints;
             UpdateArticlesWithDiscount();
         }
 
-        public int GetCashPoints()
+        public decimal GetCashPoints()
         {
             return _cashPoints;
         }
@@ -44,7 +46,7 @@ namespace Shinsekai_API.Services
             {
                 PriceData = new SessionLineItemPriceDataOptions
                 {
-                    UnitAmountDecimal = (article.Price - article.DiscountPrice) * 100,
+                    UnitAmountDecimal = (_disccountApplied ? decimal.Round(article.Price, 2) : article.Price - article.DiscountPrice) * 100,
                     Currency = Currency,
                     ProductData = new SessionLineItemPriceDataProductDataOptions
                     {
@@ -61,12 +63,15 @@ namespace Shinsekai_API.Services
             var totalPrice = Articles.Sum(a => (a.Price - a.DiscountPrice) * a.Quantity);
             var totalQuantity = Articles.Sum(a => a.Quantity);
             var totalWithDiscount = totalPrice - cashPoints;
-            cashPoints = totalWithDiscount < 0 ? (int)Math.Abs(totalWithDiscount) : 0;
+            cashPoints = totalWithDiscount < 0 ? totalWithDiscount : 0;
+            _cashPoints -= cashPoints;
 
             foreach (var article in Articles)
             {
                 article.Price = cashPoints == 0 ? totalWithDiscount / totalQuantity : decimal.Zero;
             }
+
+            _disccountApplied = true;
         }
     }
 }

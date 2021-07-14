@@ -13,6 +13,7 @@ namespace Shinsekai_API.Config
         public string MailServiceEmail { get; set; }
 
         public string MailServicePassword { get; set; }
+        public string SendGridApiKey { get; set; }
         public ApiConfiguration(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -27,6 +28,7 @@ namespace Shinsekai_API.Config
             MailServiceEmail = Configuration["SenderEmail"];
             MailServicePassword = Configuration["MailPassword"];
             BlobStorageConnectionString = Configuration["StorageConnectionString"];
+            SendGridApiKey = Configuration["SendGridApiKey"];
         }
     }
 }

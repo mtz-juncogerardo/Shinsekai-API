@@ -34,7 +34,7 @@ namespace Shinsekai_API.Controllers
                     Error = "Something went wrong"
                 });
             }
-            dbUser.Points = _context.Points.Where(p => p.UserId == dbUser.Id && p.ExpirationDate >= DateTime.Now).ToList();
+            
             return Ok(new OkResponse()
             {
                 Response = dbUser
@@ -101,9 +101,9 @@ namespace Shinsekai_API.Controllers
             var expiredPoints = dbPoints.Where(p => p.ExpirationDate < DateTime.Now).Sum(p => p.Amount);
             var validPoints = dbPoints.Where(p => p.ExpirationDate >= DateTime.Now).Sum(p => p.Amount);
 
-            return Ok(new
+            return Ok(new OkResponse()
             {
-                Result = new PointResponse()
+                Response = new PointResponse()
                 {
                     Points = dbPoints,
                     TotalExpired = expiredPoints,

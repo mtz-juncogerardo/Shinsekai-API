@@ -10,7 +10,7 @@ namespace Shinsekai_API.Models
         [MaxLength(36)] public string Id { get; set; }
         [MaxLength(36)] public string UserId { get; set; }
         public UserItem User { get; set; }
-        public int CashPoints { get; set; }
+        public decimal CashPoints { get; set; }
         public decimal Total { get; set; }
         [DefaultValue("10-09-92")] public DateTime Date { get; set; }
         public List<PurchaseArticleItem> PurchasesArticles { get; set; }
