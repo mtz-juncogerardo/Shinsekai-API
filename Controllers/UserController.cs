@@ -75,8 +75,17 @@ namespace Shinsekai_API.Controllers
                         Favorites = f,
                         Article = a
                     }).Where(fa => fa.Favorites.UserId == id)
-                .Select(fa => fa.Article);
+                .Select(fa => fa.Article).ToList();
 
+
+            foreach (var dbFavArticle in dbFavArticles)
+            {
+                dbFavArticle.Images = new List<ImageItem>()
+                {
+                    _context.Images.FirstOrDefault(i => i.ArticleId == dbFavArticle.Id)
+                };
+            }
+            
             return Ok(new OkResponse()
             {
                 Response = dbFavArticles
@@ -136,10 +145,12 @@ namespace Shinsekai_API.Controllers
                 {
                     paa.PurchaseArticle.PurchaseId,
                     paa.PurchaseArticle.Purchase.Date,
-                    paa.PurchaseArticle.Article
+                    paa.PurchaseArticle.Article,
+                    paa.PurchaseArticle.Quantity,
+                    Image = _context.Images.FirstOrDefault(a => a.ArticleId == paa.PurchaseArticle.ArticleId)
                 }).OrderBy(p => p.PurchaseId).AsEnumerable()
                 .GroupBy(p => p.PurchaseId).ToList();
-
+            
             return Ok(new OkResponse()
             {
                 Response = dbPurchases,
@@ -180,7 +191,7 @@ namespace Shinsekai_API.Controllers
 
         [Authorize]
         [HttpPut]
-        public IActionResult SaveFavorite([FromBody] UserItem user)
+        public IActionResult UpdateUser([FromBody] UserItem user)
         {
             var id = AuthService.IdentifyUser(User.Identity);
             var dbUser = _context.Users.FirstOrDefault(u => u.Id == id);

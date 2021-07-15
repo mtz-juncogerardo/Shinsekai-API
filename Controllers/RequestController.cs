@@ -57,7 +57,7 @@ namespace Shinsekai_API.Controllers
             
             _context.Requests.Add(request);
             _context.SaveChanges();
-            var contactEmail = new UserRequestMail( "shinsekai.ml@hotmail.com", req.Name, req.PurchaseId, req.Message, req.Email, _configuration);
+            var contactEmail = new UserRequestMail( "ruben.odisey@gmail.com", req.Name, req.PurchaseId, req.Message, req.Email, _configuration);
             await contactEmail.SendEmail();
             
             return Ok(new OkResponse()

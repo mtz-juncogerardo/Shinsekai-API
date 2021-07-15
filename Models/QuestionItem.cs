@@ -6,6 +6,6 @@ namespace Shinsekai_API.Models
     {
         [MaxLength(36)] public string Id { get; set; }
         [Required] [MaxLength(200)] public string Question { get; set; }
-        [Required] [MaxLength(300)] public string Answer { get; set; }
+        [Required] [MaxLength(1000)] public string Answer { get; set; }
     }
 }
