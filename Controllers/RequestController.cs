@@ -16,12 +16,10 @@ namespace Shinsekai_API.Controllers
     public class RequestController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
-        private readonly IConfiguration _configuration;
 
-        public RequestController(ShinsekaiApiContext context, IConfiguration configuration)
+        public RequestController(ShinsekaiApiContext context)
         {
             _context = context;
-            _configuration = configuration;
         }
 
         [HttpPost]
@@ -57,7 +55,7 @@ namespace Shinsekai_API.Controllers
             
             _context.Requests.Add(request);
             _context.SaveChanges();
-            var contactEmail = new UserRequestMail( "ruben.odisey@gmail.com", req.Name, req.PurchaseId, req.Message, req.Email, _configuration);
+            var contactEmail = new UserRequestMail( "ruben.odisey@gmail.com", req.Name, req.PurchaseId, req.Message, req.Email);
             await contactEmail.SendEmail();
             
             return Ok(new OkResponse()

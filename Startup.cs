@@ -17,21 +17,17 @@ namespace Shinsekai_API
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
-        
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton(Configuration);
-            var configuration = new ApiConfiguration(Configuration);
+            var configuration = new ApiConfiguration();
             
             services.AddCors(c =>
             {
                 c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+                c.AddPolicy(name: "shinsekai", policy =>
+                {
+                    policy.WithOrigins("https://sinsekai.mx");
+                });
             });
 
             services.AddAuthentication(r =>
@@ -69,6 +65,8 @@ namespace Shinsekai_API
         {
             app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
+            app.UseCors("shinsekai");
+
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
             app.UseHttpsRedirection();
@@ -78,6 +76,10 @@ namespace Shinsekai_API
             app.UseAuthentication();
 
             app.UseAuthorization();
+
+            app.UseDefaultFiles();
+
+            app.UseStaticFiles();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }

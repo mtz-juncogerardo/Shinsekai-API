@@ -23,13 +23,11 @@ namespace Shinsekai_API.Controllers
     public class PurchaseController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
-        private readonly IConfiguration _configuration;
 
-        public PurchaseController(ShinsekaiApiContext context, IConfiguration configuration)
+        public PurchaseController(ShinsekaiApiContext context)
         {
             _context = context;
-            _configuration = configuration;
-            StripeConfiguration.ApiKey = new ApiConfiguration(configuration).StripeKey;
+            StripeConfiguration.ApiKey = new ApiConfiguration().StripeKey;
         }
 
         [Authorize]
@@ -321,9 +319,9 @@ namespace Shinsekai_API.Controllers
             _context.Purchases.Add(purchase);
             _context.SaveChanges();
 
-            var emailService = new PurchaseConfirmationMail(buyer.Email, purchase.Id, _configuration);
+            var emailService = new PurchaseConfirmationMail(buyer.Email, purchase.Id);
             await emailService.SendEmail();
-            var emailRequest = new PurchaseRequestMail(purchase, _configuration);
+            var emailRequest = new PurchaseRequestMail(purchase);
             await emailRequest.SendEmail();
 
             return Ok(new OkResponse()

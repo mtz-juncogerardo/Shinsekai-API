@@ -10,8 +10,8 @@ namespace Shinsekai_API.MailSender
     {
         private const string Subject = "Shinsekai restablece tu contraseña";
         private readonly string _buttonLink;
-        public RecoverCredentialsMail(string receiverEmail, string buttonLink, IConfiguration configuration)
-        : base(Subject, receiverEmail, configuration)
+        public RecoverCredentialsMail(string receiverEmail, string buttonLink)
+        : base(Subject, receiverEmail)
         {
             _buttonLink = buttonLink;
         }

@@ -12,8 +12,8 @@ namespace Shinsekai_API.MailSender
         private const string Subject = "Tienes una nueva Compra!";
         private const string mail = "ruben.odisey@gmail.com";
 
-        public PurchaseRequestMail(PurchaseItem purchase, IConfiguration configuration) 
-            : base(Subject, mail, configuration)
+        public PurchaseRequestMail(PurchaseItem purchase) 
+            : base(Subject, mail)
         {
             _purchaseItem = purchase;
         }

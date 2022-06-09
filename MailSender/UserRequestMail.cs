@@ -10,8 +10,8 @@ namespace Shinsekai_API.MailSender
         private readonly string _details;
         private readonly string _userEmail;
 
-        public UserRequestMail(string receiverEmail, string userName, string purchaseId, string details, string userEmail, IConfiguration configuration) 
-            : base(Subject, receiverEmail, configuration)
+        public UserRequestMail(string receiverEmail, string userName, string purchaseId, string details, string userEmail) 
+            : base(Subject, receiverEmail)
         {
             _userName = userName;
             _userEmail = userEmail;

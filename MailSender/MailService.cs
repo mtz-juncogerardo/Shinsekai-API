@@ -13,11 +13,11 @@ namespace Shinsekai_API.MailSender
         private readonly string _subject;
         private readonly ApiConfiguration _configuration;
 
-        protected MailService(string subject, string receiverEmail, IConfiguration configuration)
+        protected MailService(string subject, string receiverEmail)
         {
             _subject = subject;
             _receiverEmail = receiverEmail;
-            _configuration = new ApiConfiguration(configuration);
+            _configuration = new ApiConfiguration();
         }
 
         public async Task SendEmail()

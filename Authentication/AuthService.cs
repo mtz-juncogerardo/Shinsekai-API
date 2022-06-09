@@ -20,9 +20,9 @@ namespace Shinsekai_API.Authentication
             Password = password;
         }
 
-        public string AuthByEmailAndPassword(UserItem user, IConfiguration configuration) 
+        public string AuthByEmailAndPassword(UserItem user) 
         {
-            var jwt = new JsonWebTokenAuth(user.Id, user.Email, configuration);
+            var jwt = new JsonWebTokenAuth(user.Id, user.Email);
             var passwordService = new PasswordService(Password, user.AuthParams.Salt);
 
             return passwordService.HashPassword != user.AuthParams.Password ? null : jwt.Token;

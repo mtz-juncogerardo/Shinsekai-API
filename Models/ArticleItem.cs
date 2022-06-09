@@ -12,7 +12,7 @@ namespace Shinsekai_API.Models
     public class ArticleItem : ITag
     {
         [MaxLength(36)] public string Id { get; set; }
-        [MaxLength(50)] public string Name { get; set; }
+        [MaxLength(300)] public string Name { get; set; }
         public decimal Height { get; set; }
         public decimal Price { get; set; }
         public decimal DiscountPrice { get; set; }

@@ -13,8 +13,8 @@ namespace Shinsekai_API.MailSender
         private const string Subject = "Welcome to Shinsekai Shop";
 
         private readonly string _buttonLink;
-        public EmailValidationMail(string receiverEmail, string buttonLink, IConfiguration configuration)
-        : base(Subject, receiverEmail, configuration)
+        public EmailValidationMail(string receiverEmail, string buttonLink)
+        : base(Subject, receiverEmail)
         {
             _buttonLink = buttonLink;
         }

@@ -19,35 +19,35 @@ namespace Shinsekai_API.Authentication
         private readonly string _salt;
         private readonly bool _smallExpiration;
 
-        public JsonWebTokenAuth(string tokenId, string email, IConfiguration configuration, bool smallExpiration = false)
+        public JsonWebTokenAuth(string tokenId, string email, bool smallExpiration = false)
         {
             _tokenId = tokenId;
             _email = email;
             _smallExpiration = smallExpiration;
             _password = string.Empty;
             _salt = string.Empty;
-            Token = GenerateJwtToken(configuration);
+            Token = GenerateJwtToken();
         }
 
-        public JsonWebTokenAuth(UserItem user, IConfiguration configuration, bool smallExpiration = false)
+        public JsonWebTokenAuth(UserItem user, bool smallExpiration = false)
         {
             _tokenId = user.Id;
             _email = user.Email;
-            Token = GenerateJwtToken(user, configuration);
+            Token = GenerateJwtToken(user);
         }
 
-        public JsonWebTokenAuth(string tokenId, string email, string password, string salt, IConfiguration configuration)
+        public JsonWebTokenAuth(string tokenId, string email, string password, string salt)
         {
             _tokenId = tokenId;
             _email = email;
             _password = password;
             _salt = salt;
             _smallExpiration = false;
-            Token = GenerateJwtToken(configuration);
+            Token = GenerateJwtToken();
         }
-        private string GenerateJwtToken(IConfiguration config)
+        private string GenerateJwtToken()
         {
-            var configuration = new ApiConfiguration(config);
+            var configuration = new ApiConfiguration();
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.JwtSecretKey));
             var loginCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha512);
             var tokenOptions = new JwtSecurityToken(
@@ -68,9 +68,9 @@ namespace Shinsekai_API.Authentication
             return tokenString;
         }
 
-        private string GenerateJwtToken(UserItem user, IConfiguration config)
+        private string GenerateJwtToken(UserItem user)
         {
-            var configuration = new ApiConfiguration(config);
+            var configuration = new ApiConfiguration();
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.JwtSecretKey));
             var loginCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha512);
             var tokenOptions = new JwtSecurityToken(

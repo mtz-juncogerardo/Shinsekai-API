@@ -7,8 +7,8 @@ namespace Shinsekai_API.MailSender
         private readonly string _purchaseId;
         private const string Subject = "Shinsekai - Thank you for your purchase";
 
-        public PurchaseConfirmationMail(string receiverEmail, string purchaseId, IConfiguration configuration) 
-            : base(Subject, receiverEmail, configuration)
+        public PurchaseConfirmationMail(string receiverEmail, string purchaseId) 
+            : base(Subject, receiverEmail)
         {
             _purchaseId = purchaseId;
         }

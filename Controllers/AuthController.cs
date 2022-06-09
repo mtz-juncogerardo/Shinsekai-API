@@ -16,12 +16,9 @@ namespace Shinsekai_API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ShinsekaiApiContext _context;
-        private readonly IConfiguration _configuration;
-
-        public AuthController(ShinsekaiApiContext context, IConfiguration configuration)
+        public AuthController(ShinsekaiApiContext context)
         {
             _context = context;
-            _configuration = configuration;
         }
 
         [Authorize]
@@ -42,7 +39,6 @@ namespace Shinsekai_API.Controllers
             });
         }
 
-
         [HttpPost("authorize")]
         public IActionResult AuthorizeUser(UserItem user)
         {
@@ -55,7 +51,7 @@ namespace Shinsekai_API.Controllers
             }
 
             user.Id = Guid.NewGuid().ToString();
-            var jwt = new JsonWebTokenAuth(user, _configuration, true);
+            var jwt = new JsonWebTokenAuth(user, true);
 
             return Ok(new OkResponse()
             {
@@ -84,7 +80,7 @@ namespace Shinsekai_API.Controllers
             }
             dbUser.AuthParams = _context.AuthParams.FirstOrDefault(r => r.Id == dbUser.AuthParamsId);
             var auth = new AuthService(authParams.Email, authParams.Password);
-            var token = auth.AuthByEmailAndPassword(dbUser, _configuration);
+            var token = auth.AuthByEmailAndPassword(dbUser);
             if (token == null)
             {
                 return Unauthorized(new
@@ -109,9 +105,9 @@ namespace Shinsekai_API.Controllers
                     Error = "No hay ninguna cuenta asociada con el email proporcionado"
                 });
             }
-            var jwt = new JsonWebTokenAuth(dbUser.Id, dbUser.Email, _configuration, true);
+            var jwt = new JsonWebTokenAuth(dbUser.Id, dbUser.Email, true);
             var link = $"https://shinsekai.mx/recovery/{jwt.Token}";
-            var recoverCredentials = new RecoverCredentialsMail(dbUser.Email, link, _configuration);
+            var recoverCredentials = new RecoverCredentialsMail(dbUser.Email, link);
             recoverCredentials.SendEmail();
             return Ok(new
             {
@@ -145,9 +141,9 @@ namespace Shinsekai_API.Controllers
             };
             var jwt = new JsonWebTokenAuth(dbUser.Id,
                 dbUser.Email,
-                passwordService.HashPassword, passwordService.Salt, _configuration);
+                passwordService.HashPassword, passwordService.Salt);
             var link = $"https://shinsekai.mx/register?token={jwt.Token}";
-            var emailValidation = new EmailValidationMail(dbUser.Email, link, _configuration);
+            var emailValidation = new EmailValidationMail(dbUser.Email, link);
 
             try
             {
@@ -185,7 +181,7 @@ namespace Shinsekai_API.Controllers
             var dbUser = _context.Users.FirstOrDefault(u => u.Email == email);
             if (dbUser != null && dbUser.AuthParamsId != null)
             {
-                var auth = new JsonWebTokenAuth(dbUser.Id, dbUser.Email, _configuration);
+                var auth = new JsonWebTokenAuth(dbUser.Id, dbUser.Email);
                 return Ok(new
                 {
                     Response = auth.Token
@@ -222,7 +218,7 @@ namespace Shinsekai_API.Controllers
             }
 
             _context.SaveChanges();
-            var jwt = new JsonWebTokenAuth(dbUser.Id, dbUser.Email, _configuration);
+            var jwt = new JsonWebTokenAuth(dbUser.Id, dbUser.Email);
 
             return Ok(new
             {

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shinsekai_API.Models;
 
 namespace Shinsekai_API.Migrations
 {
     [DbContext(typeof(ShinsekaiApiContext))]
-    partial class ShinsekaiApiContextModelSnapshot : ModelSnapshot
+    [Migration("20210804204810_ShinsekaiMigration_v16")]
+    partial class ShinsekaiMigration_v16
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
